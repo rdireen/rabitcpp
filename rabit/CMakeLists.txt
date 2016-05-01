@@ -3,14 +3,9 @@ project(rabit)
 file(GLOB_RECURSE ${PROJECT_NAME}_headers "src/*.h")
 file(GLOB_RECURSE ${PROJECT_NAME}_sources "src/*.cpp")
 
-set(${PROJECT_NAME}_include_dirs "")
-foreach (_headerFile ${${PROJECT_NAME}_headers})
-  get_filename_component(_dir ${_headerFile} PATH)
-  list(APPEND ${PROJECT_NAME}_include_dirs ${_dir})
-endforeach()
-list(REMOVE_DUPLICATES ${PROJECT_NAME}_include_dirs)
-
-#message("Show the headers: ${${PROJECT_NAME}_headers}")
+# This macro gets all the include directories from
+# ${PROJECT_NAME}_headers and puts them into ${PROJECT_NAME}_include_dirs
+get_include_dirs() # within cmake/utils.cmake
 
 find_package( Threads )
 include_directories(${${PROJECT_NAME}_include_dirs})

@@ -2,6 +2,7 @@
 #define RABIT_MESSAGE_QUEUE
 
 #include <string>
+#include <memory>
 #include "SafeQueue.h"
 
 namespace Rabit{
@@ -14,7 +15,7 @@ namespace Rabit{
 
     std::string _msgQueueName;
     int _maxNoMessagesAllowedInQueue;
-    SafeQueue<T> _messQueue;
+    std::unique_ptr<SafeQueue<T>> _messQueue;
 
   // Accessors
   public:
@@ -36,21 +37,21 @@ namespace Rabit{
     RabitMessageQueue(int maxNoMessages, std::string msgQName){
       SetMaxNoMessagesAllowedInQueue(maxNoMessages);
       _msgQueueName = msgQName.empty() ? "MessageQueue" : msgQName;
-      _messQueue = SafeQueue<T>();
+      _messQueue = std::unique_ptr<SafeQueue<T>>(new SafeQueue<T>());
     }
 
-    void ClearMessQueue(){
-      _messQueue.clear();
+    void ClearMessageQueue(){
+      _messQueue->clear();
     }
 
     int NoMessagesInQueue(){
-      return _messQueue.size();
+      return _messQueue->size();
     }
 
-    bool addMessage(T msg){
-      if( _messQueue.size() < _maxNoMessagesAllowedInQueue)
+    bool AddMessage(T msg){
+      if( _messQueue->size() < _maxNoMessagesAllowedInQueue)
       {
-          _messQueue.enqueue(msg);
+          _messQueue->enqueue(msg);
           // Fire off trigger
           return true;
       }else{
@@ -58,20 +59,20 @@ namespace Rabit{
       }
     }
 
-    bool addMessageNoEventTrigger(T msg){
-      if( _messQueue.size() < _maxNoMessagesAllowedInQueue)
+    bool AddMessageNoEventTrigger(T msg){
+      if( _messQueue->size() < _maxNoMessagesAllowedInQueue)
       {
-          _messQueue.enqueue(msg);
+          _messQueue->enqueue(msg);
           return true;
       }else{
           return false;
       }
     }
 
-    T getMessage(){ //This blocks if nothing is in it. Put a wait in it?
+    T GetMessage(){ //This blocks if nothing is in it. Put a wait in it?
       T msg;
-      if( _messQueue.size() > 0){
-        msg = _messQueue.dequeue();
+      if( _messQueue->size() > 0){
+        msg = _messQueue->dequeue();
       }
       return msg;
     }

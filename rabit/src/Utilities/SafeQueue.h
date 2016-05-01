@@ -18,6 +18,9 @@ namespace Rabit{
       , c()
     {}
 
+    SafeQueue( const SafeQueue& other ) = delete; // non construction-copyable
+    SafeQueue& operator=( const SafeQueue& ) = delete; // non copyable
+
     ~SafeQueue(void)
     {}
 
@@ -47,10 +50,15 @@ namespace Rabit{
       std::swap(q, empty);
     }
 
-    void size()
+    int size()
     {
       std::lock_guard<std::mutex> lock(m);
       return q.size();
+    }
+
+    bool empty()
+    {
+      return q.empty();
     }
 
   private:
