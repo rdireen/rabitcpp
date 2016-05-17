@@ -1,10 +1,15 @@
 #ifndef RABIT_MANAGER
 #define RABIT_MANAGER
 
+#include <memory>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <chrono>
 #include <exception>
 #include <iostream>
+#include "RabitWorkspace.h"
+#include "RabitMessage.h"
 
 namespace Rabit{
   
@@ -12,18 +17,23 @@ namespace Rabit{
     
   private:
     int _wakeupTimeDelayMSec = 1000;
+    int _wakeupNTimes = 0;
     std::thread  _managerThread;
+    std::mutex _mutexWaitFor;
+    std::condition_variable _cvar;
     std::string _managerName = "None";
     bool _shutdownManager;
+    typedef RabitMessageQueue<std::shared_ptr<RabitMessage>> RabitQueue;
+    std::shared_ptr<RabitQueue> _mgrMessageQueueUptr;
     
   //Accessors  
   public:
 
-    int GetWakeupTimeDelayMSec(){
+    int GetWakeupTimeDelayMSec() const{
       return _wakeupTimeDelayMSec;
     }
 
-    double GetWakeupTimeDelaySec(){
+    double GetWakeupTimeDelaySec() const{
       return 0.001 * (double)_wakeupTimeDelayMSec;
     }
 
@@ -35,17 +45,30 @@ namespace Rabit{
       _wakeupTimeDelayMSec = 1000 * (int)value;
     }
     
-    std::string GetManagerName(){
+    std::string GetManagerName() {
       if(_managerName == "None"){
-         _managerName = ReturnManagerName();
+         _managerName = _managerName;
       }
       return _managerName;
     }
     
   public:
     
-    RabitManager(){
+    RabitManager(std::string name){
+      _managerName = name;
+      _mgrMessageQueueUptr = std::make_shared<RabitQueue>(1000, name);
       _shutdownManager = false;
+    }
+
+    template<typename T>
+    bool AddPublishSubscribeMessage(std::string name, T msg)
+    {
+      RabitWorkspace::GetWorkspace()->AddPublishSubscribeMessage(name, msg);
+    }
+
+    template<typename T>
+    void AddManagerMessageQueue(std::string name, T rabitMessageQueue){
+      RabitWorkspace::GetWorkspace()->AddManagerMessageQueue(name, rabitMessageQueue);
     }
     
     void Run(){
@@ -55,18 +78,22 @@ namespace Rabit{
     void ShutdownManager(){
       _shutdownManager = true;
     }
+
+
     
     void Join(){
       _managerThread.join();	
     }
-    
-    std::string virtual ReturnManagerName() = 0;
     
     void virtual Startup(){
       
     }
     
     void virtual ExecuteUnitOfWork() = 0;
+
+    void WakeUpManagerEH(){
+      _cvar.notify_one();
+    }
     
     void virtual Shutdown(){
       
@@ -81,9 +108,12 @@ namespace Rabit{
       while(!_shutdownManager and true) // need to add to MgrControl here
       {
 	try{
+
 	  ExecuteUnitOfWork();
+
 	  if ( _wakeupTimeDelayMSec > 0 ) {
-	     std::this_thread::sleep_for(std::chrono::milliseconds(_wakeupTimeDelayMSec));
+	    std::unique_lock<std::mutex> lk(_mutexWaitFor);
+	    _cvar.wait_for(lk, std::chrono::milliseconds(_wakeupTimeDelayMSec));
 	  }
 	  
 	  //MgrControl.FetchMessage();
@@ -91,7 +121,6 @@ namespace Rabit{
 	}catch(std::exception& e){
 	  std::cout << "Manager: " << _managerName 
 	            << " with exception: " << e.what();
-	  
 	}    
 	
       }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <boost/signals2.hpp>
 #include "SafeQueue.h"
 
 namespace Rabit{
@@ -16,6 +17,11 @@ namespace Rabit{
     std::string _msgQueueName;
     int _maxNoMessagesAllowedInQueue;
     std::unique_ptr<SafeQueue<T>> _messQueue;
+    boost::signals2::signal<void ()> _sigEnqueue;
+    boost::signals2::signal<void ()> _sigDequeue;
+
+   public:
+    typedef boost::signals2::signal<void ()>::slot_type _sigEnqueuSlotType;
 
   // Accessors
   public:
@@ -52,11 +58,19 @@ namespace Rabit{
       if( _messQueue->size() < _maxNoMessagesAllowedInQueue)
       {
           _messQueue->enqueue(msg);
-          // Fire off trigger
+          _sigEnqueue();
           return true;
       }else{
           return false;
       }
+    }
+
+    void Register_SomethingEnqueued(const boost::function<void ()> &handler){
+      _sigEnqueue.connect(handler);
+    }
+
+    void Register_SomethingDequeued(const boost::function<void ()> &handler){
+      _sigDequeue.connect(handler);
     }
 
     bool AddMessageNoEventTrigger(T msg){
@@ -69,10 +83,11 @@ namespace Rabit{
       }
     }
 
-    T GetMessage(){ //This blocks if nothing is in it. Put a wait in it?
+    T GetMessage(){
       T msg;
       if( _messQueue->size() > 0){
         msg = _messQueue->dequeue();
+        _sigDequeue();
       }
       return msg;
     }

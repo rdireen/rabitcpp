@@ -46,5 +46,5 @@ enable_testing()
 # The subdirectories
 #************************************************************************************
 add_subdirectory(rabit) 
-add_subdirectory(tests)
+add_subdirectory(examples)
 add_subdirectory(test)

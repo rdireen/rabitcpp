@@ -1,5 +1,8 @@
 project(rabit)
 
+find_package (Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+
 file(GLOB_RECURSE ${PROJECT_NAME}_headers "src/*.h")
 file(GLOB_RECURSE ${PROJECT_NAME}_sources "src/*.cpp")
 
