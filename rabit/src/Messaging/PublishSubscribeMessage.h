@@ -3,44 +3,51 @@
 
 #include <chrono>
 #include <memory>
+#include <mutex>
+#include <typeinfo>
+#include <typeindex>
 #include "RabitMessage.h"
 
 namespace Rabit{
 
+  class RabitMessage;
   class PublishSubscribeMessage {
 
   private:
-    std::shared_ptr<RabitMessage> _statusMessage;
+    std::unique_ptr<RabitMessage> _statusMessage;
+    mutable std::mutex _mutex;
 
   public:
 
-    PublishSubscribeMessage(std::shared_ptr<RabitMessage> stMessage){
-      _statusMessage = stMessage;
+    PublishSubscribeMessage(std::unique_ptr<RabitMessage> stMessage){
+      _statusMessage = std::move(stMessage);
     }
-
+  /*
     std::shared_ptr<RabitMessage> GetStatusMessage() const{
+      std::lock_guard<std::mutex> lk(_mutex);
+      return _statusMessage;
+    }
+    */
+
+    std::type_index MsgTypeIndex() const;
+
+    std::unique_ptr<RabitMessage> GetCopyOfMessage();
+
+    void PostMessage(RabitMessage* msg_ptr);
+
+    bool FetchMessage(RabitMessage* msg_ptr);
+
+    void ForceFetchMessage(RabitMessage* msg_ptr);
+
+    /**
+     * @brief GetTestMessage just used for testing
+     * @return
+     */
+    const std::unique_ptr<RabitMessage>& GetTestMessage(){
       return _statusMessage;
     }
 
-    std::string MsgTypeName() const{
-      return _statusMessage->GetMessageTypeName();
-    }
-
-    typedef std::chrono::high_resolution_clock::time_point TimeStamp;
-    const TimeStamp& GetTimeStamp() const{
-      return _statusMessage->GetTimeStamp();
-    }
-
-    std::shared_ptr<RabitMessage> GetCopyOfMessage(){
-      // need to lock this down. Multiple managers have access to it.
-      return _statusMessage->Clone();
-    }
-
-
   };
-  
 }
-
-
 
 #endif //PUBLISH_SUBSCRIBE_MESSAGE

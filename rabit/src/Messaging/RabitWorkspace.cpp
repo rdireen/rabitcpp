@@ -3,7 +3,7 @@
 
 namespace Rabit{
 
-    std::shared_ptr<RabitWorkspace> RabitWorkspace::rabitWorkspace;
+    RabitWorkspace* RabitWorkspace::_rabitWorkspace = nullptr;
   
   
 }
