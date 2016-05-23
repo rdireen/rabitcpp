@@ -3,6 +3,15 @@
 
 namespace Rabit{
 
+  bool RabitMessage::Register_SomethingPublished(const boost::function<void ()> &handler){
+    auto gpsm = GetGlobalPublishSubscribeMessageRef();
+    if(gpsm != nullptr){
+      gpsm->Register_SomethingPublished(handler);
+    } else {
+      throw GlobalPublishSubscribeException(GetMessageTypeName());
+    }
+  }
+
   void RabitMessage::PostMessage() {
     auto gpsm = GetGlobalPublishSubscribeMessageRef();
     if(gpsm != nullptr){

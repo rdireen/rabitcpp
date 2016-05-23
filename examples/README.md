@@ -24,6 +24,11 @@ example4
 
 Shows how to use PublishSubscribeMessages **witout events**.
 
+example5
+--------
+
+Shows how to use PublishSubscribeMessages **WITH events**.
+
 
 
 

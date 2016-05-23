@@ -61,6 +61,7 @@ namespace Rabit{
       return _timeStamp;
     }
 
+    bool Register_SomethingPublished(const boost::function<void ()> &handler);
 
     /**
      * @brief PostMessage

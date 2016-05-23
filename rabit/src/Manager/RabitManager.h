@@ -10,6 +10,7 @@
 #include <iostream>
 #include "RabitWorkspace.h"
 #include "RabitMessage.h"
+#include "ManagerControlMessage.h"
 
 namespace Rabit{
   
@@ -24,7 +25,8 @@ namespace Rabit{
     std::string _managerName = "None";
     bool _shutdownManager;
     typedef RabitMessageQueue<std::shared_ptr<RabitMessage>> RabitQueue;
-    std::shared_ptr<RabitQueue> _mgrMessageQueueUptr;
+    std::shared_ptr<RabitQueue> _mgrMessageQueue_sptr;
+    std::shared_ptr<ManagerControlMessage> _mgrControl_sptr;
     
   //Accessors  
   public:
@@ -56,8 +58,10 @@ namespace Rabit{
     
     RabitManager(std::string name){
       _managerName = name;
-      _mgrMessageQueueUptr = std::make_shared<RabitQueue>(1000, name);
+      _mgrMessageQueue_sptr = std::make_shared<RabitQueue>(1000, name);
       _shutdownManager = false;
+      _mgrControl_sptr = std::make_shared<ManagerControlMessage>("ManagerControlMessage");
+      this->AddPublishSubscribeMessage(_mgrControl_sptr->GetMessageTypeName(), _mgrControl_sptr);
     }
 
     template<typename T>
@@ -67,8 +71,19 @@ namespace Rabit{
     }
 
     template<typename T>
+    void WakeUpManagerOnMessagePost(T msg)
+    {
+      msg->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
+    }
+
+    template<typename T>
     void AddManagerMessageQueue(std::string name, T rabitMessageQueue){
       RabitWorkspace::GetWorkspace()->AddManagerMessageQueue(name, rabitMessageQueue);
+    }
+
+    template<typename T>
+    void WakeUpManagerOnEnqueue(T queue){
+      queue->Register_SomethingEnqueued(boost::bind(&RabitManager::WakeUpManagerEH, this));
     }
 
     template<typename T>
@@ -82,6 +97,11 @@ namespace Rabit{
     
     void ShutdownManager(){
       _shutdownManager = true;
+    }
+
+    void ShutdownAllManagers(bool value){
+      _mgrControl_sptr->ShutdownAllManagers(value);
+      _mgrControl_sptr->PostMessage();
     }
 
 
@@ -110,7 +130,7 @@ namespace Rabit{
       
       Startup();
       
-      while(!_shutdownManager and true) // need to add to MgrControl here
+      while(!_shutdownManager and !_mgrControl_sptr->GetShutdownAllManagers())
       {
 	try{
 
@@ -121,7 +141,7 @@ namespace Rabit{
 	    _cvar.wait_for(lk, std::chrono::milliseconds(_wakeupTimeDelayMSec));
 	  }
 	  
-	  //MgrControl.FetchMessage();
+	  _mgrControl_sptr->FetchMessage();
 	  
 	}catch(std::exception& e){
 	  std::cout << "Manager: " << _managerName 

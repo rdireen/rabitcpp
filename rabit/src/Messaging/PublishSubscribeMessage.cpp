@@ -8,6 +8,10 @@ namespace Rabit{
     return _statusMessage->GetTypeIndex();
   }
 
+  void PublishSubscribeMessage::Register_SomethingPublished(const boost::function<void ()> &handler){
+    _sigPublished.connect(handler);
+  }
+
   std::unique_ptr<RabitMessage> PublishSubscribeMessage::GetCopyOfMessage(){
     std::lock_guard<std::mutex> lk(_mutex);
     return std::move(_statusMessage->Clone());
@@ -16,6 +20,7 @@ namespace Rabit{
   void PublishSubscribeMessage::PostMessage(RabitMessage* msg_ptr){
     std::lock_guard<std::mutex> lk(_mutex);
     msg_ptr->SetTimeNow();
+    _sigPublished();
     _statusMessage->CopyMessage(msg_ptr);
   }
 

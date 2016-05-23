@@ -6,6 +6,7 @@
 #include <mutex>
 #include <typeinfo>
 #include <typeindex>
+#include <boost/signals2.hpp>
 #include "RabitMessage.h"
 
 namespace Rabit{
@@ -16,6 +17,7 @@ namespace Rabit{
   private:
     std::unique_ptr<RabitMessage> _statusMessage;
     mutable std::mutex _mutex;
+    boost::signals2::signal<void ()> _sigPublished;
 
   public:
 
@@ -30,6 +32,8 @@ namespace Rabit{
     */
 
     std::type_index MsgTypeIndex() const;
+
+    void Register_SomethingPublished(const boost::function<void ()> &handler);
 
     std::unique_ptr<RabitMessage> GetCopyOfMessage();
 

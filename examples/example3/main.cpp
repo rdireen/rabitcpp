@@ -110,7 +110,8 @@ public:
     _cstrings.push_back("worth");
     
     // This is how we know someone has placed an item into the queue we setup.
-    _rqueue_sptr->Register_SomethingEnqueued(boost::bind(&CensorManager::WakeUpManagerEH, this));
+    //_rqueue_sptr->Register_SomethingEnqueued(boost::bind(&CensorManager::WakeUpManagerEH, this));
+    this->WakeUpManagerOnEnqueue(_rqueue_sptr);
   }
 
   void ExecuteUnitOfWork() final {
@@ -153,7 +154,8 @@ public:
     this->SetWakeupTimeDelayMSec(1000);
     _cqueue_sptr = make_shared<RabitMessageQueue<std::string>>(100, "printstrings");
     this->AddManagerMessageQueue(_cqueue_sptr->GetMessageQueueName(), _cqueue_sptr);
-    _cqueue_sptr->Register_SomethingEnqueued(boost::bind(&ConsoleManager::WakeUpManagerEH, this));
+    //_cqueue_sptr->Register_SomethingEnqueued(boost::bind(&ConsoleManager::WakeUpManagerEH, this));
+    this->WakeUpManagerOnEnqueue(_cqueue_sptr);
   }
 
   void ExecuteUnitOfWork() final {
@@ -174,7 +176,7 @@ typedef std::unique_ptr<Rabit::RabitManager> ManagerPtr;
 int main(int argc, char* argv[]) {
   
   std::cout << "***************************************************" << std::endl;
-  std::cout << "*              Censored Message                   *" << std::endl;
+  std::cout << "*              Publish and Event                  *" << std::endl;
   std::cout << "***************************************************" << std::endl;
   std::cout << std::endl;
   
