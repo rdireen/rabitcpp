@@ -6,7 +6,7 @@ Is a library for building multithreaded systems. Utitilties for sending messages
 Documentation
 -------------
 
-None really yet... take a looke at the [examples](examples/README.md) and the **unittests**
+None really yet... take a look at the [examples](examples/README.md) and the **unittests**
 
 
 	

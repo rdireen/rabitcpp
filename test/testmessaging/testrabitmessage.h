@@ -64,8 +64,11 @@ public:
   virtual std::unique_ptr<Rabit::RabitMessage> Clone() final{}
 
   virtual bool CopyMessage(Rabit::RabitMessage* msg) final{
-    _timeStamp = msg->GetTimeStamp();
-    _messageTypeName = msg->GetMessageTypeName();
+    Rabit::RabitMessage::CopyMessage(msg); // call baseclass
+    if(msg->GetTypeIndex() == std::type_index(typeid(MessageA))){
+      return true;
+    }
+    return false;
   }
 
   virtual void Clear() final {

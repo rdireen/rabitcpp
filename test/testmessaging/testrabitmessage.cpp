@@ -3,6 +3,7 @@
  * of the circular referencing.
  */
 
+#include <iostream>
 #include "testrabitmessage.h"
 #include <memory>
 #include "GlobalPublishSubscribeException.h"
@@ -66,10 +67,18 @@ TEST_F(RabitMessageTest, CopyMessage) {
 
   EXPECT_EQ(msg2.a, static_cast<MessageA*>(msg.get())->a);
   EXPECT_EQ(msg2.b, static_cast<MessageA*>(msg.get())->b);
+}
+
+TEST_F(RabitMessageTest, CopyMessage2) {
+
+  auto msg = unique_ptr<RabitMessage>(new MessageA("MessageA"));
+  static_cast<MessageA*>(msg.get())->a = 5;
+  static_cast<MessageA*>(msg.get())->b = 7;
 
   auto msg3 = MessageB("MessageB");
   // These arn't the same message so it wont get copied
-  EXPECT_EQ(msg3.CopyMessage(msg.get()), false);
+  bool test = msg3.CopyMessage(msg.get()) == false;
+  EXPECT_EQ(test, false);
 }
 
 TEST_F(RabitMessageTest, GlobalPSHasNoReferenceException) {
