@@ -64,7 +64,7 @@ public:
 
         // This is how we communicate with the CensorManager. The CensorManager has
         // added a RabitMessageQueue to the RabitWorkspace
-        RabitWorkspace::GetWorkspace()->AddMessageToQueue("rawstrings", next);
+        this->AddMessageToQueue("rawstrings", next);
       } else {
         this->ShutdownManager();
       }
@@ -84,7 +84,6 @@ private:
     shared_ptr<RabitMessageQueue<std::string>> _rqueue_sptr;
     vector<string> _cstrings;
 public:
-
 
   CensorManager(string name) : RabitManager(name){
 
@@ -122,7 +121,7 @@ public:
 
       if(val == "end"){
         this->ShutdownManager();
-        RabitWorkspace::GetWorkspace()->AddMessageToQueue("printstrings", val);
+        this->AddMessageToQueue("printstrings", val);
       }
       else{
         for (int m = 0; m < _cstrings.size(); m++){
@@ -133,7 +132,7 @@ public:
               val.replace(index, _cstrings[m].length(), c);
             }
         }
-        RabitWorkspace::GetWorkspace()->AddMessageToQueue("printstrings", val);
+        this->AddMessageToQueue("printstrings", val);
       }
     }
 

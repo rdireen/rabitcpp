@@ -70,6 +70,11 @@ namespace Rabit{
     void AddManagerMessageQueue(std::string name, T rabitMessageQueue){
       RabitWorkspace::GetWorkspace()->AddManagerMessageQueue(name, rabitMessageQueue);
     }
+
+    template<typename T>
+    void AddMessageToQueue(std::string name, T msg){
+      RabitWorkspace::GetWorkspace()->AddMessageToQueue(name, msg);
+    }
     
     void Run(){
       _managerThread = std::thread(&RabitManager::managerMain, this);

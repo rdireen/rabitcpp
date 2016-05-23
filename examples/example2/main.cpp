@@ -51,7 +51,7 @@ public:
       if(!_vstrings.empty()){
         string next = _vstrings.back();
         _vstrings.pop_back();
-        RabitWorkspace::GetWorkspace()->AddMessageToQueue("rawstrings", next);
+        this->AddMessageToQueue("rawstrings", next);
       } else {
         this->ShutdownManager();
       }
@@ -112,7 +112,7 @@ public:
             }
         }
 
-        RabitWorkspace::GetWorkspace()->AddMessageToQueue("printstrings", val);
+        this->AddMessageToQueue("printstrings", val);
     }
 
     _counter++;

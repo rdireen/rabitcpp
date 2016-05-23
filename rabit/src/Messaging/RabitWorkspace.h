@@ -31,7 +31,6 @@ namespace Rabit{
 
   public:
 
-
     static RabitWorkspace* GetWorkspace(){
       if(!_rabitWorkspace)
         _rabitWorkspace = new RabitWorkspace();
@@ -41,6 +40,26 @@ namespace Rabit{
     template<typename T>
     void AddManagerMessageQueue(std::string name, std::shared_ptr<RabitMessageQueue<T>> queue){
       _messageQueueDict[name] = queue;
+    }
+
+    template<typename T>
+    bool AddMessageToQueue(std::string name, T msg){
+      auto search = _messageQueueDict.find(name);
+      if(search != _messageQueueDict.end()){
+        boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->AddMessage(msg);
+        return true;
+      }
+      return false;
+    }
+
+    template<typename T>
+    bool Register_DequeuedEvent(std::string name, const boost::function<void ()> &handler){
+      auto search = _messageQueueDict.find(name);
+      if(search != _messageQueueDict.end()){
+        boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->Register_SomethingDequeued(handler);
+        return true;
+      }
+      return false;
     }
 
     bool AddPublishSubscribeMessage(std::string name, std::shared_ptr<RabitMessage> msg){
@@ -71,30 +90,7 @@ namespace Rabit{
       return std::move(rm);
     }
 
-    template<typename T>
-    bool AddMessageToQueue(std::string name, T msg){
-      auto search = _messageQueueDict.find(name);
-      if(search != _messageQueueDict.end()){
-        boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->AddMessage(msg);
-        return true;
-      }
-      return false;
-    }
-
-    template<typename T>
-    bool Register_DequeuedEvent(std::string name, const boost::function<void ()> &handler){
-      auto search = _messageQueueDict.find(name);
-      if(search != _messageQueueDict.end()){
-        boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->Register_SomethingDequeued(handler);
-        return true;
-      }
-      return false;
-    }
-
-
   };
-
-
 }
 
 
