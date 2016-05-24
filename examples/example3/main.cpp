@@ -179,6 +179,8 @@ int main(int argc, char* argv[]) {
   std::cout << "*              Publish and Event                  *" << std::endl;
   std::cout << "***************************************************" << std::endl;
   std::cout << std::endl;
+
+  auto rr = make_shared<RabitMessageQueue<std::string>>(10,"mine");
   
   auto stringM = ManagerPtr(new StringManager("StringManager"));
   auto censorM = ManagerPtr(new CensorManager("CensorManager"));

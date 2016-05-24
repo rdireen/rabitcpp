@@ -2,6 +2,7 @@
 #define RABIT_WORKSPACE
 
 #include <memory>
+#include <iostream>
 #include <unordered_map>
 #include <string>
 #include <boost/any.hpp>
@@ -37,6 +38,12 @@ namespace Rabit{
       return _rabitWorkspace;
     }
 
+    void LeavingReactor(){
+      _tmp = nullptr;
+
+      //Loop through unordered dictionary and nullify pointers
+    }
+
     template<typename T>
     void AddManagerMessageQueue(std::string name, std::shared_ptr<RabitMessageQueue<T>> queue){
       _messageQueueDict[name] = queue;
@@ -70,7 +77,7 @@ namespace Rabit{
         psMsgContainer->MgrMsgRef = msg;
         psMsgContainer->PSMsg = std::make_shared<PublishSubscribeMessage>(msg->Clone());
         msg->GlobalPublishSubscribeMessageRef(psMsgContainer->PSMsg);
-        _publishSubscribeMsgDict[name] = std::move(psMsgContainer);
+        _publishSubscribeMsgDict[name] = psMsgContainer;
       } else {
           if(_publishSubscribeMsgDict[name]->PSMsg->MsgTypeIndex() == msg->GetTypeIndex()){
             msg->GlobalPublishSubscribeMessageRef(_publishSubscribeMsgDict[name]->PSMsg);

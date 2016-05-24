@@ -61,13 +61,14 @@ namespace Rabit{
       _mgrMessageQueue_sptr = std::make_shared<RabitQueue>(1000, name);
       _shutdownManager = false;
       _mgrControl_sptr = std::make_shared<ManagerControlMessage>("ManagerControlMessage");
-      this->AddPublishSubscribeMessage(_mgrControl_sptr->GetMessageTypeName(), _mgrControl_sptr);
+      //this->AddPublishSubscribeMessage(_mgrControl_sptr->GetMessageTypeName(), _mgrControl_sptr);
     }
 
     template<typename T>
     bool AddPublishSubscribeMessage(std::string name, T msg)
     {
-      RabitWorkspace::GetWorkspace()->AddPublishSubscribeMessage(name, msg);
+      auto msgr = std::static_pointer_cast<RabitMessage>(msg);
+      RabitWorkspace::GetWorkspace()->AddPublishSubscribeMessage(name, msgr);
     }
 
     template<typename T>
@@ -123,6 +124,14 @@ namespace Rabit{
     void virtual Shutdown(){
       
     }
+
+    /**
+     * If this isn't declared as virtual the destructor of the Super Managers wouldn't
+     * get called and I would get memory leaks.
+     */
+    virtual ~RabitManager(){
+
+    }
     
   private:
     
@@ -141,7 +150,7 @@ namespace Rabit{
 	    _cvar.wait_for(lk, std::chrono::milliseconds(_wakeupTimeDelayMSec));
 	  }
 	  
-	  _mgrControl_sptr->FetchMessage();
+	  //_mgrControl_sptr->FetchMessage();
 	  
 	}catch(std::exception& e){
 	  std::cout << "Manager: " << _managerName 
@@ -153,6 +162,8 @@ namespace Rabit{
       Shutdown();
 
     }
+
+
   };
 }
 

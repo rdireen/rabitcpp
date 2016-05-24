@@ -77,7 +77,7 @@ public:
 class NumberManager : public RabitManager{
 
 private:
-    shared_ptr<MessageA> _messageA_sptr;
+    shared_ptr<RabitMessage> _messageA_sptr;
 public:
 
   NumberManager(string name ) : RabitManager(name){
@@ -90,14 +90,20 @@ public:
   }
 
   void ExecuteUnitOfWork() final {
-      if(_messageA_sptr->a < 20){
-        _messageA_sptr->a++;
-        _messageA_sptr->b++;
-        _messageA_sptr->PostMessage();
-      } else {
-        this->ShutdownManager();
-      }
+    this->ShutdownManager();
+    /*
+    if(_messageA_sptr->a < 20){
+      _messageA_sptr->a++;
+      _messageA_sptr->b++;
+       _messageA_sptr->PostMessage();
+    } else {
+      this->ShutdownManager();
+    }
+    */
+
   }
+
+
 };
 
 /**
@@ -113,12 +119,14 @@ public:
     // Change this above and below 500 to see if Fetching Works properly.
     this->SetWakeupTimeDelayMSec(200);
     _messageA_sptr = make_shared<MessageA>("MessageA");
-    this->AddPublishSubscribeMessage(_messageA_sptr->GetMessageTypeName(), _messageA_sptr);
+    //this->AddPublishSubscribeMessage(_messageA_sptr->GetMessageTypeName(), _messageA_sptr);
   }
 
   void ExecuteUnitOfWork() final {
 
+    this->ShutdownManager();
     // See if a new message is there and get it.
+/*
     if(_messageA_sptr->FetchMessage()){
       cout << "::Got new message::" << endl;
       if( _messageA_sptr->a < 20){
@@ -129,7 +137,10 @@ public:
     } else {
       cout << "::NO NEW MESSAGE::" << endl;
     }
+    */
+
   }
+
 };
 
 typedef std::unique_ptr<Rabit::RabitManager> ManagerPtr;
@@ -140,13 +151,15 @@ int main(int argc, char* argv[]) {
   std::cout << "***************************************************" << std::endl;
   std::cout << std::endl;
   
+
   auto numberM = ManagerPtr(new NumberManager("NumberManager"));
   auto consoleM = ManagerPtr(new ConsoleManager("ConsoleManager"));
-  
+
   auto reactor = Rabit::RabitReactor();
   
   reactor.AddManager(std::move(numberM));
   reactor.AddManager(std::move(consoleM));
+
   
   reactor.Run();
   

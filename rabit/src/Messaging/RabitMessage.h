@@ -89,8 +89,11 @@ namespace Rabit{
     std::string GetMessageTypeName() const{
       return _messageTypeName;
     }
+
+    virtual ~RabitMessage(){
+
+    }
   };
-  
 }
 
 

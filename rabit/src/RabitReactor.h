@@ -40,6 +40,8 @@ namespace Rabit{
      for (auto &manager : listOfManagers_){
 	manager->Join();
      }
+
+     RabitWorkspace::GetWorkspace()->LeavingReactor();
     }
   };
 }
