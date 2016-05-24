@@ -128,6 +128,7 @@ public:
         _messageA_sptr->b++;
         _messageA_sptr->PostMessage();
       } else {
+        //This uses the ManagerControlMessage
         this->ShutdownAllManagers(true);
       }
   }
@@ -144,6 +145,7 @@ public:
     this->SetWakeupTimeDelayMSec(5000);
     _messageA_sptr = make_shared<MessageA>("MessageA");
     this->AddPublishSubscribeMessage(_messageA_sptr->GetMessageTypeName(), _messageA_sptr);
+    // This sets the event
     this->WakeUpManagerOnMessagePost(_messageA_sptr);
   }
 
@@ -156,9 +158,7 @@ public:
     } else {
       cout << "::NO NEW MESSAGE::" << endl;
     }
-
   }
-
 };
 
 typedef std::unique_ptr<Rabit::RabitManager> ManagerPtr;

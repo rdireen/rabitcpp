@@ -24,6 +24,7 @@ namespace Rabit{
 
     std::unordered_map<std::string, boost::any > _messageQueueDict;
     std::unordered_map<std::string, std::unique_ptr<PSMsgContainer> > _publishSubscribeMsgDict;
+    std::shared_ptr<RabitMessage> _tmp;
 
   private:
     RabitWorkspace(){}
@@ -39,9 +40,8 @@ namespace Rabit{
     }
 
     void LeavingReactor(){
-      _tmp = nullptr;
-
-      //Loop through unordered dictionary and nullify pointers
+      _messageQueueDict.clear();
+      _publishSubscribeMsgDict.clear();
     }
 
     template<typename T>
@@ -77,7 +77,7 @@ namespace Rabit{
         psMsgContainer->MgrMsgRef = msg;
         psMsgContainer->PSMsg = std::make_shared<PublishSubscribeMessage>(msg->Clone());
         msg->GlobalPublishSubscribeMessageRef(psMsgContainer->PSMsg);
-        _publishSubscribeMsgDict[name] = psMsgContainer;
+        _publishSubscribeMsgDict[name] = std::move(psMsgContainer);
       } else {
           if(_publishSubscribeMsgDict[name]->PSMsg->MsgTypeIndex() == msg->GetTypeIndex()){
             msg->GlobalPublishSubscribeMessageRef(_publishSubscribeMsgDict[name]->PSMsg);

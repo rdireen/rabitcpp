@@ -61,7 +61,7 @@ namespace Rabit{
       _mgrMessageQueue_sptr = std::make_shared<RabitQueue>(1000, name);
       _shutdownManager = false;
       _mgrControl_sptr = std::make_shared<ManagerControlMessage>("ManagerControlMessage");
-      //this->AddPublishSubscribeMessage(_mgrControl_sptr->GetMessageTypeName(), _mgrControl_sptr);
+      this->AddPublishSubscribeMessage(_mgrControl_sptr->GetMessageTypeName(), _mgrControl_sptr);
     }
 
     template<typename T>
@@ -150,7 +150,7 @@ namespace Rabit{
 	    _cvar.wait_for(lk, std::chrono::milliseconds(_wakeupTimeDelayMSec));
 	  }
 	  
-	  //_mgrControl_sptr->FetchMessage();
+	  _mgrControl_sptr->FetchMessage();
 	  
 	}catch(std::exception& e){
 	  std::cout << "Manager: " << _managerName 
