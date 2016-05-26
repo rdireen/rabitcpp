@@ -8,6 +8,9 @@ get_include_dirs() # within cmake/utils.cmake
 file(GLOB SRCS *.cpp)
 file(GLOB HDRS *.h)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # debug, no optimisation
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
+
 include_directories(${${PROJECT_NAME}_include_dirs})
 add_executable(${PROJECT_NAME} ${HDRS} ${SRCS})
 target_link_libraries(${PROJECT_NAME} rabit libgmock)

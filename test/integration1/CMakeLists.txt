@@ -11,6 +11,9 @@ set(${PROJECT_NAME}_sources main.cpp)
 
 # set(EXECUTABLE_OUTPUT_PATH "../../")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # debug, no optimisation
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
+
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package( Threads REQUIRED)
 include_directories(${${PROJECT_NAME}_include_dirs})
