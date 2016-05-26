@@ -30,3 +30,4 @@ script:
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
 - echo Oh yes I did ...
 - ctest
+
