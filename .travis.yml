@@ -23,8 +23,8 @@ matrix:
 
 before_install:
 - sudo apt-get update -qq
-- sudo add-apt-repository -y ppa:edd/misc
-- sudo apt-get update -q
+- sudo add-apt-repository ppa:apokluda/boost1.56 --yes
+- sudo apt-get update
 - sudo apt-get install libboost-dev
 
 script:
