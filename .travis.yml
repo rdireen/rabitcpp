@@ -38,6 +38,7 @@ script:
 - echo Oh yes I did ...
 - ctest
 
+
 after_success:
 - Rscript -e 'covr::coveralls()'
 
