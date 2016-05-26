@@ -29,6 +29,9 @@ matrix:
 before_install:
 - sudo apt-get update -qq
 
+install:
+  - ./travis-tool.sh github_package jimhester/covr
+ 
 
 script:
 - mkdir build
@@ -36,4 +39,7 @@ script:
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
 - echo Oh yes I did ...
 - ctest
+
+after_success:
+  - Rscript -e 'covr::coveralls()'
 
