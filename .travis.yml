@@ -29,8 +29,7 @@ matrix:
 
 before_install:
 - sudo apt-get update -qq
-- curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-- chmod 755 ./travis-tool.sh
+- pip install --user cpp-coveralls
 
 install:
   - ./travis-tool.sh github_package jimhester/covr
@@ -39,10 +38,9 @@ script:
 - mkdir build
 - cd build
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
-- echo Oh yes I did ...
 - ctest
 
 
 after_success:
-- Rscript -e 'covr::coveralls()'
+- coveralls --gcov-options '\-lp'
 
