@@ -25,11 +25,15 @@ matrix:
             - libboost1.55-all-dev
       env: COMPILER=g++-5
  
-r_github_packages:
-- jimhester/covr
+
 
 before_install:
 - sudo apt-get update -qq
+- curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+- chmod 755 ./travis-tool.sh
+
+install:
+  - ./travis-tool.sh github_package jimhester/covr
  
 script:
 - mkdir build
