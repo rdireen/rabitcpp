@@ -8,6 +8,7 @@
 #include <boost/any.hpp>
 #include "RabitMessageQueue.h"
 #include "PublishSubscribeMessage.h"
+#include "MessageNotRegisteredException.h"
 
 namespace Rabit{
   
@@ -50,23 +51,21 @@ namespace Rabit{
     }
 
     template<typename T>
-    bool AddMessageToQueue(std::string name, T msg){
+    void AddMessageToQueue(std::string name, T msg){
       auto search = _messageQueueDict.find(name);
-      if(search != _messageQueueDict.end()){
-        boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->AddMessage(msg);
-        return true;
+      if(search == _messageQueueDict.end()){
+        throw MessageNotRegisteredException(name);
       }
-      return false;
+      boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->AddMessage(msg);
     }
 
     template<typename T>
     bool Register_DequeuedEvent(std::string name, const boost::function<void ()> &handler){
       auto search = _messageQueueDict.find(name);
-      if(search != _messageQueueDict.end()){
-        boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->Register_SomethingDequeued(handler);
-        return true;
+      if(search == _messageQueueDict.end()){
+        throw MessageNotRegisteredException(name);
       }
-      return false;
+      boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->Register_SomethingDequeued(handler);
     }
 
     bool AddPublishSubscribeMessage(std::string name, std::shared_ptr<RabitMessage> msg){
@@ -99,7 +98,5 @@ namespace Rabit{
 
   };
 }
-
-
 
 #endif //RABIT_WORKSPACE

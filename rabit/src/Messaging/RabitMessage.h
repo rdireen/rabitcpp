@@ -30,6 +30,7 @@ namespace Rabit{
   public:
     RabitMessage(std::string messageTypeName){
       _messageTypeName = messageTypeName;
+      _timeStamp = std::chrono::high_resolution_clock::now();
     }
 
     virtual std::unique_ptr<RabitMessage> Clone(){}
