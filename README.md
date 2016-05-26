@@ -9,7 +9,7 @@ Metrics
 **TravisCI:**
 
 [![Build Status](https://travis-ci.org/rdireen/rabitcpp.svg?branch=master)](https://travis-ci.org/rdireen/rabitcpp)
-[![Coverage Status](https://coveralls.io/repos/rdireen/rabitcpp/badge.svg?branch=master)](https://coveralls.io/r/rdireen/rabitcpp?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/rdireen/rabitcpp/badge.svg?branch=master)](https://coveralls.io/github/rdireen/rabitcpp?branch=master)
 
 Documentation
 -------------

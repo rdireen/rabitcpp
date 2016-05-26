@@ -1,4 +1,4 @@
-project(testmessaging)
+project(testutils)
 
 file(GLOB_RECURSE ${PROJECT_NAME}_headers "../../rabit/src/*.h")
 # This macro gets all the include directories from
@@ -10,7 +10,7 @@ file(GLOB HDRS *.h)
 
 include_directories(${${PROJECT_NAME}_include_dirs})
 add_executable(${PROJECT_NAME} ${HDRS} ${SRCS})
-target_link_libraries(${PROJECT_NAME} rabit libgmock)
+target_link_libraries(${PROJECT_NAME} rabit gcov libgmock)
 add_test(${PROJECT_NAME} ${PROJECT_NAME})
 
 

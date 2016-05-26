@@ -26,10 +26,21 @@ configure_file (
   "${PROJECT_BINARY_DIR}/rabitConfig.h"
   )
   
+
+option(WITHTESTS "Compile code with unit tests and integration tests" OFF)
+option(WITHEXAMPLES "Compile code with examples" OFF)
+option(WITHCOVERAGE "Compile code with code coverage (for online CI)" OFF)
+
+
 # add the binary tree to the search path for include files
 # so that we will find rabitConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
 
+
+if(WITHCOVERAGE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # debug, no optimization
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
+endif()
 #************************************************************************************
 # Include some macros to make CMakeLists files cleaner
 #************************************************************************************
@@ -46,5 +57,12 @@ enable_testing()
 # The subdirectories
 #************************************************************************************
 add_subdirectory(rabit) 
-add_subdirectory(examples)
-add_subdirectory(test)
+
+if(WITHEXAMPLES)
+  add_subdirectory(examples)
+endif()
+
+if(WITHTESTS)
+  add_subdirectory(test)
+endif()
+

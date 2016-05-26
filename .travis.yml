@@ -35,10 +35,11 @@ before_install:
 script:
 - mkdir build
 - cd build
-- cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
+- cmake -DCMAKE_CXX_COMPILER=$COMPILER -DWITHTESTS:BOOL=ON  -DWITHEXAMPLES:BOOL=ON -DWITHCOVERAGE:BOOL=ON .. 
+- make
 - ctest
 
 
 after_success:
-- coveralls --gcov-options '\-lp'
+- coveralls --exclude test --exclude examples --gcov-options '\-lp'
 
