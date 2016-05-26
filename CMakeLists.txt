@@ -30,9 +30,6 @@ configure_file (
 # so that we will find rabitConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
 
-
-
-
 #************************************************************************************
 # Include some macros to make CMakeLists files cleaner
 #************************************************************************************
