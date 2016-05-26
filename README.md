@@ -3,6 +3,14 @@ Rabit
 
 Is a library for building multithreaded systems. Utitilties for sending messages back and forth between Managers (each existing on its own thread) are included. 
 
+Metrics
+-------
+
+**TravisCI:**
+
+[![Build Status](https://travis-ci.org/rdireen/rabitcpp.svg?branch=master)](https://travis-ci.org/rdireen/rabitcpp)
+[![Coverage Status](https://coveralls.io/repos/rdireen/rabitcpp/badge.svg?branch=master)](https://coveralls.io/r/rdireen/rabitcpp?branch=master)
+
 Documentation
 -------------
 
