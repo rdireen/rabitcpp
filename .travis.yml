@@ -24,15 +24,13 @@ matrix:
             - g++-5
             - libboost1.55-all-dev
       env: COMPILER=g++-5
-      
+ 
+r_github_packages:
+- jimhester/covr
 
 before_install:
 - sudo apt-get update -qq
-
-install:
-  - ./travis-tool.sh github_package jimhester/covr
  
-
 script:
 - mkdir build
 - cd build
@@ -41,5 +39,5 @@ script:
 - ctest
 
 after_success:
-  - Rscript -e 'covr::coveralls()'
+- Rscript -e 'covr::coveralls()'
 
