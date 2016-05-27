@@ -39,7 +39,7 @@ script:
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DWITHTESTS:BOOL=ON  -DWITHEXAMPLES:BOOL=ON -DWITHCOVERAGE:BOOL=ON .. 
 - make
 - ctest
-- lcov -b . -d . --capture --output-file app.info
+- lcov -b . -d . --capture --compat split_crc=ON
 
 
 after_success:
