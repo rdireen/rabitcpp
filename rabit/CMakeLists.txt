@@ -14,3 +14,9 @@ find_package( Threads )
 include_directories(${${PROJECT_NAME}_include_dirs})
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})
 target_link_libraries( ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} )
+
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${rabit_VERSION})
+set_property(TARGET ${PROJECT_NAME} PROPERTY SOVERSION ${rabit_VERSION_MAJOR} )
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+install(FILES ${${PROJECT_NAME}_headers} DESTINATION include/rabit)

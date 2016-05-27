@@ -14,14 +14,48 @@ Metrics
 Documentation
 -------------
 
-None really yet... take a look at the [examples](examples/README.md) and the **unittests**
+See [examples](examples/README.md) and the **unittests**
+
+Build and Install
+=================
 
 
-	
-Install
-=======
+Rabit depends on **Boost** 1.55 or later. 
 
-Building is done with [CMake](https://cmake.org/)
+```
+$ sudo apt-get install libboost-all-dev
+```
+
+Building Rabit is done with [CMake](https://cmake.org/)
+
+Do this to build:
+
+```
+$ git clone https://github.com/rdireen/rabitcpp
+$ cd rabitcpp
+$ mkdir build
+$ cd build
+$ cmake -DWITHTESTS:BOOL=ON  -DWITHEXAMPLES:BOOL=ON ..
+$ make
+```
+
+You should be able to run the examples:
+
+```
+$ ./example3
+```
+
+and you should be able to run the tests
+
+```
+$ make test
+```
+
+You can install with 
+
+```
+$ make install
+```
 
 Contributing
 ============

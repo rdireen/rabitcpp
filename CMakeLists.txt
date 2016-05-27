@@ -16,7 +16,7 @@ project (rabit_dev)
 set(rabit_VERSION_MAJOR 1)
 set(rabit_VERSION_MINOR 0)
 set(rabit_VERSION_PATCH 0)
-set(VERSION "${rabit_VERSION_MAJOR}.${rabit_VERSION_MINOR}.${rabit_VERSION_PATCH}")
+set(rabit_VERSION "${rabit_VERSION_MAJOR}.${rabit_VERSION_MINOR}.${rabit_VERSION_PATCH}")
 
 
 # configure a header file to pass some of the CMake settings
