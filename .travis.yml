@@ -41,5 +41,5 @@ script:
 
 
 after_success:
-- coveralls --exclude test --exclude examples --gcov-options '\-lp'
+- coveralls --gcov-options '\-lp'
 
