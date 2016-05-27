@@ -29,7 +29,8 @@ matrix:
 
 before_install:
 - sudo apt-get update -qq
-- pip install --user cpp-coveralls
+- sudo apt-get install lcov rubygems
+- gem install lcoveralls
 
  
 script:
@@ -38,8 +39,9 @@ script:
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DWITHTESTS:BOOL=ON  -DWITHEXAMPLES:BOOL=ON -DWITHCOVERAGE:BOOL=ON .. 
 - make
 - ctest
+- lcov -b . -d . --capture
 
 
 after_success:
-- coveralls --gcov-options '\-lp'
+- lcoveralls
 
