@@ -83,6 +83,11 @@ namespace Rabit{
     }
 
     template<typename T>
+    T GetManagerMessageQueue(std::string name){
+      return RabitWorkspace::GetWorkspace()->GetManagerMessageQueue<T>(name);
+    }
+
+    template<typename T>
     void WakeUpManagerOnEnqueue(T queue){
       queue->Register_SomethingEnqueued(boost::bind(&RabitManager::WakeUpManagerEH, this));
     }

@@ -15,7 +15,7 @@ project (rabit_dev)
 # The version number.
 set(rabit_VERSION_MAJOR 1)
 set(rabit_VERSION_MINOR 0)
-set(rabit_VERSION_PATCH 0)
+set(rabit_VERSION_PATCH 1)
 set(rabit_VERSION "${rabit_VERSION_MAJOR}.${rabit_VERSION_MINOR}.${rabit_VERSION_PATCH}")
 
 

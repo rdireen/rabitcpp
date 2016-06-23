@@ -51,6 +51,15 @@ namespace Rabit{
     }
 
     template<typename T>
+    T GetManagerMessageQueue(std::string name){
+      auto search = _messageQueueDict.find(name);
+      if(search == _messageQueueDict.end()){
+        throw MessageNotRegisteredException(name);
+      }
+      return boost::any_cast<T>(_messageQueueDict[name]);
+    }
+
+    template<typename T>
     void AddMessageToQueue(std::string name, T msg){
       auto search = _messageQueueDict.find(name);
       if(search == _messageQueueDict.end()){
