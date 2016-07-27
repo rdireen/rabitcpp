@@ -68,6 +68,17 @@ namespace Rabit{
       boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->AddMessage(msg);
     }
 
+      //Register an event when a message is added to the Queue.
+      template<typename T>
+      bool Register_EnqueuedEvent(std::string name, const boost::function<void ()> &handler){
+          auto search = _messageQueueDict.find(name);
+          if(search == _messageQueueDict.end()){
+              throw MessageNotRegisteredException(name);
+          }
+          boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->Register_SomethingEnqueued(handler);
+      }
+
+      //Register an event when a message is pulled from the Queue.
     template<typename T>
     bool Register_DequeuedEvent(std::string name, const boost::function<void ()> &handler){
       auto search = _messageQueueDict.find(name);
