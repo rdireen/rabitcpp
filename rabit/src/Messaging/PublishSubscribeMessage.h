@@ -1,6 +1,15 @@
 #ifndef PUBLISH_SUBSCRIBE_MESSAGE
 #define PUBLISH_SUBSCRIBE_MESSAGE
 
+/* ****************************************************************
+ * Rabit Multi-Threaded Management System
+ * Athrs: Randal Direen PhD
+ *        Harry Direen PhD
+ * www.direentech.com
+ * Date: June 2016
+ *
+ *******************************************************************/
+
 #include <chrono>
 #include <memory>
 #include <mutex>
@@ -9,49 +18,55 @@
 #include <boost/signals2.hpp>
 #include "RabitMessage.h"
 
-namespace Rabit{
+namespace Rabit
+{
 
-  class RabitMessage;
-  class PublishSubscribeMessage {
+    class RabitMessage;
 
-  private:
-    std::unique_ptr<RabitMessage> _statusMessage;
-    mutable std::mutex _mutex;
-    boost::signals2::signal<void ()> _sigPublished;
+    class PublishSubscribeMessage
+    {
 
-  public:
+    private:
+        std::unique_ptr<RabitMessage> _statusMessage;
+        mutable std::mutex _mutex;
+        boost::signals2::signal<void()> _sigPublished;
 
-    PublishSubscribeMessage(std::unique_ptr<RabitMessage> stMessage){
-      _statusMessage = std::move(stMessage);
-    }
-  /*
-    std::shared_ptr<RabitMessage> GetStatusMessage() const{
-      std::lock_guard<std::mutex> lk(_mutex);
-      return _statusMessage;
-    }
-    */
+    public:
 
-    std::type_index MsgTypeIndex() const;
+        PublishSubscribeMessage(std::unique_ptr<RabitMessage> stMessage)
+        {
+            _statusMessage = std::move(stMessage);
+        }
 
-    void Register_SomethingPublished(const boost::function<void ()> &handler);
+        /*
+          std::shared_ptr<RabitMessage> GetStatusMessage() const{
+            std::lock_guard<std::mutex> lk(_mutex);
+            return _statusMessage;
+          }
+          */
 
-    std::unique_ptr<RabitMessage> GetCopyOfMessage();
+        std::type_index MsgTypeIndex() const;
 
-    void PostMessage(RabitMessage* msg_ptr);
+        void Register_SomethingPublished(const boost::function<void()> &handler);
 
-    bool FetchMessage(RabitMessage* msg_ptr);
+        std::unique_ptr<RabitMessage> GetCopyOfMessage();
 
-    void ForceFetchMessage(RabitMessage* msg_ptr);
+        void PostMessage(RabitMessage *msg_ptr);
 
-    /**
-     * @brief GetTestMessage just used for testing
-     * @return
-     */
-    const std::unique_ptr<RabitMessage>& GetTestMessage(){
-      return _statusMessage;
-    }
+        bool FetchMessage(RabitMessage *msg_ptr);
 
-  };
+        void ForceFetchMessage(RabitMessage *msg_ptr);
+
+        /**
+         * @brief GetTestMessage just used for testing
+         * @return
+         */
+        const std::unique_ptr<RabitMessage> &GetTestMessage()
+        {
+            return _statusMessage;
+        }
+
+    };
 }
 
 #endif //PUBLISH_SUBSCRIBE_MESSAGE

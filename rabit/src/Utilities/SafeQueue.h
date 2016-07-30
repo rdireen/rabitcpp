@@ -1,3 +1,11 @@
+/* ****************************************************************
+ * Rabit Multi-Threaded Management System
+ * Athrs: Randal Direen PhD
+ *        Harry Direen PhD
+ * www.direentech.com
+ * Date: June 2016
+ *
+ *******************************************************************/
 
 #ifndef SAFEQUEUE
 #define SAFEQUEUE
@@ -6,66 +14,66 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace Rabit{
+namespace Rabit
+{
 
-  template <class T>
-  class SafeQueue
-  {
-  public:
-    SafeQueue(void)
-      : q()
-      , m()
-      , c()
-    {}
-
-    SafeQueue( const SafeQueue& other ) = delete; // non construction-copyable
-    SafeQueue& operator=( const SafeQueue& ) = delete; // non copyable
-
-    ~SafeQueue(void)
-    {}
-
-    void enqueue(T t)
+    template<class T>
+    class SafeQueue
     {
-      std::lock_guard<std::mutex> lock(m);
-      q.push(t);
-      //c.notify_one();
-    }
+    public:
+        SafeQueue(void)
+                : q(), m(), c()
+        {}
 
-    T dequeue(void)
-    {
-      std::unique_lock<std::mutex> lock(m);
-      //while(q.empty())
-      //{
-        //c.wait(lock);
-      //}
-      T val = q.front();
-      q.pop();
-      return val;
-    }
+        SafeQueue(const SafeQueue &other) = delete; // non construction-copyable
+        SafeQueue &operator=(const SafeQueue &) = delete; // non copyable
 
-    void clear()
-    {
-      std::lock_guard<std::mutex> lock(m);
-      std::queue<T> empty;
-      std::swap(q, empty);
-    }
+        ~SafeQueue(void)
+        {}
 
-    int size()
-    {
-      std::lock_guard<std::mutex> lock(m);
-      return q.size();
-    }
+        void enqueue(T t)
+        {
+            std::lock_guard<std::mutex> lock(m);
+            q.push(t);
+            //c.notify_one();
+        }
 
-    bool empty()
-    {
-      return q.empty();
-    }
+        T dequeue(void)
+        {
+            std::unique_lock<std::mutex> lock(m);
+            //while(q.empty())
+            //{
+            //c.wait(lock);
+            //}
+            T val = q.front();
+            q.pop();
+            return val;
+        }
 
-  private:
-    std::queue<T> q;
-    mutable std::mutex m;
-    std::condition_variable c;
-  };
+        void clear()
+        {
+            std::lock_guard<std::mutex> lock(m);
+            std::queue<T> empty;
+            std::swap(q, empty);
+        }
+
+        int size()
+        {
+            //Should not need to lock on checking size
+            //std::lock_guard<std::mutex> lock(m);
+            return q.size();
+        }
+
+        bool empty()
+        {
+            return q.empty();
+        }
+
+    private:
+        std::queue<T> q;
+        mutable std::mutex m;
+        std::condition_variable c;
+    };
 }
 
 #endif //SAFEQUEUE

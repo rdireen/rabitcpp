@@ -1,34 +1,47 @@
 #ifndef GLOBAL_PUBLISH_SUBSCRIBE_EXCEPTION
 #define GLOBAL_PUBLISH_SUBSCRIBE_EXCEPTION
+/* ****************************************************************
+ * Rabit Multi-Threaded Management System
+ * Athrs: Randal Direen PhD
+ *        Harry Direen PhD
+ * www.direentech.com
+ * Date: June 2016
+ *
+ *******************************************************************/
 
 #include <iostream>
 #include <sstream>
 #include <exception>
 
 
-namespace Rabit{
+namespace Rabit
+{
 
-  class MessageNotRegisteredException : public std::exception{
+    class MessageNotRegisteredException : public std::exception
+    {
 
-  private:
-    std::string _message;
+    private:
+        std::string _message;
 
-  public:
+    public:
 
-    MessageNotRegisteredException(){
-      _message = "Attempting to access message that does not exist in global workspace.";
-    }
+        MessageNotRegisteredException()
+        {
+            _message = "Attempting to access message that does not exist in global workspace.";
+        }
 
-    MessageNotRegisteredException(std::string messageName){
-      std::ostringstream os;
-      os << messageName << ": Attempting to access message that does not exist in global workspace.";
-      _message = os.str();
-    }
+        MessageNotRegisteredException(std::string messageName)
+        {
+            std::ostringstream os;
+            os << messageName << ": Attempting to access message that does not exist in global workspace.";
+            _message = os.str();
+        }
 
-    virtual const char* what() const throw(){
-      return _message.c_str();
-    }
-  };
+        virtual const char *what() const throw()
+        {
+            return _message.c_str();
+        }
+    };
 }
 
 #endif //GLOBAL_PUBLISH_SUBSCRIBE_EXCEPTION
