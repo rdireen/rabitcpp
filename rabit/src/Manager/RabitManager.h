@@ -52,13 +52,41 @@ namespace Rabit
         std::shared_ptr<ManagerControlMessage> _mgrControlAllMgrs_sptr;
 
         //A Manager control message that applies to this manager only.
-        std::shared_ptr<ManagerControlMessage> _mgrControlThisMgrs_sptr;
+        std::shared_ptr<ManagerControlMessage> _mgrControlThisMgr_sptr;
 
         //The Status and Stats of this manager.
         std::shared_ptr<ManagerStatusMessage> _mgrStatus_sptr;
 
         //Accessors
     public:
+
+        //A Manager control message that applies to all managers.
+	//This message is automatically keep up-to-date in each manager.
+	//Message:  Rabit::ManagerControlMessage
+	//Publish Subscribe Message Name:  "ManagerControlMessage"
+        std::shared_ptr<ManagerControlMessage> GetControlAllManagersMessage()
+	{
+	    return _mgrControlAllMgrs_sptr;
+	}
+	
+        //A Manager control message that applies to all managers.
+	//This message is automatically keep up-to-date in each manager.
+	//Message:  Rabit::ManagerControlMessage
+	//Publish Subscribe Message Name:  "ManagerName:ManagerControlMessage"
+        std::shared_ptr<ManagerControlMessage> GetControlThisManagerMessage()
+	{
+	    return _mgrControlThisMgr_sptr;
+	}
+
+        //A Manager control message that applies to all managers.
+	//This message is automatically keep up-to-date in each manager.
+	//Message:  Rabit::ManagerControlMessage
+	//Publish Subscribe Message Name:  "ManagerName:ManagerStatusMessage"
+        std::shared_ptr<ManagerStatusMessage> GetManagerStatusMessage()
+	{
+	    return _mgrStatus_sptr;
+	}
+
 
         int GetWakeupTimeDelayMSec() const
         {
@@ -142,7 +170,7 @@ namespace Rabit
 
         void ShutdownAllManagers(bool value)
         {
-            _mgrControlAllMgrs_sptr->ShutdownAllManagers(value);
+            _mgrControlAllMgrs_sptr->ShutdownManager(value);
             _mgrControlAllMgrs_sptr->PostMessage();
         }
 

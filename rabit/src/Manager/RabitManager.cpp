@@ -21,11 +21,13 @@ namespace Rabit
 
         _mgrControlAllMgrs_sptr = std::make_shared<ManagerControlMessage>("ManagerControlMessage");
         this->AddPublishSubscribeMessage(_mgrControlAllMgrs_sptr->GetMessageTypeName(), _mgrControlAllMgrs_sptr);
+	_mgrControlAllMgrs_sptr->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
 
         //This Manager may be controlled with a Manager Control Message with Name:  "MngName:ManagerControlMessage"
         tmpStr = _managerName + ":ManagerControlMessage";
-        _mgrControlThisMgrs_sptr = std::make_shared<ManagerControlMessage>(tmpStr);
-        this->AddPublishSubscribeMessage(_mgrControlThisMgrs_sptr->GetMessageTypeName(), _mgrControlThisMgrs_sptr);
+        _mgrControlThisMgr_sptr = std::make_shared<ManagerControlMessage>(tmpStr);
+        this->AddPublishSubscribeMessage(_mgrControlThisMgr_sptr->GetMessageTypeName(), _mgrControlThisMgr_sptr);
+	_mgrControlThisMgr_sptr->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
 
         //This Manager Status and Stats Message Name:  "MngName:ManagerStatusMessage"
         tmpStr = _managerName + ":ManagerStatusMessage";
@@ -64,7 +66,7 @@ namespace Rabit
     {
         float time = 1000000.0;
         time = _mgrControlAllMgrs_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlAllMgrs_sptr->PulishMgrStatsTime_Sec : time;
-        time = _mgrControlThisMgrs_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlThisMgrs_sptr->PulishMgrStatsTime_Sec : time;
+        time = _mgrControlThisMgr_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlThisMgr_sptr->PulishMgrStatsTime_Sec : time;
         return time;
     }
 
@@ -92,21 +94,23 @@ namespace Rabit
 
         _mgrTotalTimeSec.reset();
 
-        while (!_shutdownManager and !_mgrControlAllMgrs_sptr->GetShutdownAllManagers())
+        while (!_shutdownManager 
+		and !_mgrControlAllMgrs_sptr->GetShutdownManager()
+		and !_mgrControlThisMgr_sptr->GetShutdownManager() )
         {
             exceptionOccurred = false;
             try
             {
                 msgChanged = _mgrControlAllMgrs_sptr->FetchMessage();
-                msgChanged |= _mgrControlThisMgrs_sptr->FetchMessage();
+                msgChanged |= _mgrControlThisMgr_sptr->FetchMessage();
                 if (msgChanged)
                 {
                     if (_mgrControlAllMgrs_sptr->ResetMgrStatsToggle != mcAllResetStats
-                        || _mgrControlThisMgrs_sptr->ResetMgrStatsToggle != mcThisResetStats)
+                        || _mgrControlThisMgr_sptr->ResetMgrStatsToggle != mcThisResetStats)
                     {
                         _mgrStatus_sptr->ManagerStats.Clear();
                         mcAllResetStats = _mgrControlAllMgrs_sptr->ResetMgrStatsToggle;
-                        mcThisResetStats = _mgrControlThisMgrs_sptr->ResetMgrStatsToggle;
+                        mcThisResetStats = _mgrControlThisMgr_sptr->ResetMgrStatsToggle;
                         //Reset the Manager Run-Time clock;
                         _mgrTotalTimeSec.reset();
                     }

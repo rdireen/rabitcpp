@@ -22,7 +22,7 @@ namespace Rabit
     {
 
     private:
-        bool _shutdownAllManagers = false;
+        bool _shutdownManager = false;
 
     public:
         //A change in the ResetMgrStatsToggle will cause the manager
@@ -35,20 +35,20 @@ namespace Rabit
         float PulishMgrStatsTime_Sec = 10.0;
 
     public:
-        bool GetShutdownAllManagers()
+        bool GetShutdownManager()
         {
-            return _shutdownAllManagers;
+            return _shutdownManager;
         }
 
-        void ShutdownAllManagers(bool value)
+        void ShutdownManager(bool value)
         {
-            _shutdownAllManagers = value;
+            _shutdownManager = value;
         }
 
     public:
         ManagerControlMessage(std::string name) : RabitMessage(name)
         {
-            _shutdownAllManagers = false;
+            _shutdownManager = false;
             ResetMgrStatsToggle = false;
             PulishMgrStatsTime_Sec = 10.0;
         }
@@ -57,7 +57,7 @@ namespace Rabit
         {
             auto clone = std::unique_ptr<ManagerControlMessage>(new ManagerControlMessage(GetMessageTypeName()));
             clone->CopyBase(this);
-            clone->_shutdownAllManagers = this->_shutdownAllManagers;
+            clone->_shutdownManager = this->_shutdownManager;
             clone->ResetMgrStatsToggle = this->ResetMgrStatsToggle;
             clone->PulishMgrStatsTime_Sec = this->PulishMgrStatsTime_Sec;
 
@@ -70,7 +70,7 @@ namespace Rabit
             if (msg->GetTypeIndex() == std::type_index(typeid(ManagerControlMessage)))
             {
                 ManagerControlMessage* mcMsg = static_cast<ManagerControlMessage *>(msg);
-                this->_shutdownAllManagers = mcMsg->_shutdownAllManagers;
+                this->_shutdownManager = mcMsg->_shutdownManager;
                 this->ResetMgrStatsToggle = mcMsg->ResetMgrStatsToggle;
                 this->PulishMgrStatsTime_Sec = mcMsg->PulishMgrStatsTime_Sec;
                 return true;
@@ -80,7 +80,7 @@ namespace Rabit
 
         virtual void Clear() final
         {
-            _shutdownAllManagers = false;
+            _shutdownManager = false;
             ResetMgrStatsToggle = false;
             PulishMgrStatsTime_Sec = 10.0;
         }
@@ -88,7 +88,7 @@ namespace Rabit
         virtual std::string ToString() const final
         {
             std::ostringstream ss;
-            ss << "ShutdownAllManagers = " << _shutdownAllManagers
+            ss << "ShutdownAllManagers = " << _shutdownManager
                << "   RunState = " << ResetMgrStatsToggle
                << "PulishMgrStatsTime = " << PulishMgrStatsTime_Sec;
             return ss.str();
