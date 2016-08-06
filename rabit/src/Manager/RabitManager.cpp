@@ -21,13 +21,15 @@ namespace Rabit
 
         _mgrControlAllMgrs_sptr = std::make_shared<ManagerControlMessage>("ManagerControlMessage");
         this->AddPublishSubscribeMessage(_mgrControlAllMgrs_sptr->GetMessageTypeName(), _mgrControlAllMgrs_sptr);
-	_mgrControlAllMgrs_sptr->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
+        _mgrControlAllMgrs_sptr->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
 
         //This Manager may be controlled with a Manager Control Message with Name:  "MngName:ManagerControlMessage"
         tmpStr = _managerName + ":ManagerControlMessage";
         _mgrControlThisMgr_sptr = std::make_shared<ManagerControlMessage>(tmpStr);
         this->AddPublishSubscribeMessage(_mgrControlThisMgr_sptr->GetMessageTypeName(), _mgrControlThisMgr_sptr);
-	_mgrControlThisMgr_sptr->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
+        _mgrControlThisMgr_sptr->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
+
+        std::cout << "MgrControlMsgName=" << _mgrControlThisMgr_sptr->GetMessageTypeName() << std::endl;
 
         //This Manager Status and Stats Message Name:  "MngName:ManagerStatusMessage"
         tmpStr = _managerName + ":ManagerStatusMessage";
@@ -65,8 +67,10 @@ namespace Rabit
     float RabitManager::GetStatsPublishTime()
     {
         float time = 1000000.0;
-        time = _mgrControlAllMgrs_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlAllMgrs_sptr->PulishMgrStatsTime_Sec : time;
-        time = _mgrControlThisMgr_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlThisMgr_sptr->PulishMgrStatsTime_Sec : time;
+        time = _mgrControlAllMgrs_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlAllMgrs_sptr->PulishMgrStatsTime_Sec
+                                                                      : time;
+        time = _mgrControlThisMgr_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlThisMgr_sptr->PulishMgrStatsTime_Sec
+                                                                      : time;
         return time;
     }
 
@@ -82,7 +86,7 @@ namespace Rabit
         bool mcThisResetStats = false;
         bool msgChanged = false;
 
-        double publishStatsTimeSec = GetStatsPublishTime();
+        double publishStatsTimeSec = 0;
         double currentMgrTimeSec = 0;
         double lastPublishStatsTimeSec = 0;
 
@@ -94,9 +98,9 @@ namespace Rabit
 
         _mgrTotalTimeSec.reset();
 
-        while (!_shutdownManager 
-		and !_mgrControlAllMgrs_sptr->GetShutdownManager()
-		and !_mgrControlThisMgr_sptr->GetShutdownManager() )
+        while (!_shutdownManager
+               and !_mgrControlAllMgrs_sptr->GetShutdownManager()
+               and !_mgrControlThisMgr_sptr->GetShutdownManager())
         {
             exceptionOccurred = false;
             try
@@ -109,10 +113,16 @@ namespace Rabit
                         || _mgrControlThisMgr_sptr->ResetMgrStatsToggle != mcThisResetStats)
                     {
                         _mgrStatus_sptr->ManagerStats.Clear();
+                        _mgrStatus_sptr->PostMessage();
                         mcAllResetStats = _mgrControlAllMgrs_sptr->ResetMgrStatsToggle;
                         mcThisResetStats = _mgrControlThisMgr_sptr->ResetMgrStatsToggle;
                         //Reset the Manager Run-Time clock;
                         _mgrTotalTimeSec.reset();
+                        lastPublishStatsTimeSec = 0;
+                        std::cout << "Clear Mgr Stats: " << _managerName << std::endl;
+                        //std::cout << _managerName << "_MgrStats:" << std::endl
+                        //          << _mgrStatus_sptr->ManagerStats.ToString() << std::endl;
+
                     }
                     publishStatsTimeSec = GetStatsPublishTime();
                 }
@@ -147,12 +157,12 @@ namespace Rabit
                 _mgrStatus_sptr->ManagerStats.UpdateExeUnitOfWorkTimeStats(_execUnitOfWorkTime.getTimeElapsed());
                 _mgrStatus_sptr->ManagerStats.UpdateSleepTimeStats(_sleepTime.getTimeElapsed());
 
-                if( (currentMgrTimeSec - lastPublishStatsTimeSec) >  publishStatsTimeSec)
+                if ((currentMgrTimeSec - lastPublishStatsTimeSec) > publishStatsTimeSec)
                 {
                     lastPublishStatsTimeSec = currentMgrTimeSec;
                     _mgrStatus_sptr->PostMessage();
-                    std::cout << _managerName << "_MgrStats:" << std::endl
-                              << _mgrStatus_sptr->ManagerStats.ToString() << std::endl;
+                    //std::cout << _managerName << "_MgrStats:" << std::endl
+                    //          << _mgrStatus_sptr->ManagerStats.ToString() << std::endl;
                 }
 
             }
@@ -163,13 +173,13 @@ namespace Rabit
 
                 exceptionOccurred = true;
             }
-            if(exceptionOccurred)
+            if (exceptionOccurred)
             {
                 if (!_mgrStatus_sptr->ErrorCondition)
                 {
-                _mgrStatus_sptr->ErrorCondition = true;
-                _mgrStatus_sptr->ErrorCode = 1;
-                _mgrStatus_sptr->PostMessage();
+                    _mgrStatus_sptr->ErrorCondition = true;
+                    _mgrStatus_sptr->ErrorCode = 1;
+                    _mgrStatus_sptr->PostMessage();
                 }
             }
             else
