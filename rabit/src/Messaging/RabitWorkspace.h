@@ -16,6 +16,7 @@
 #include <string>
 #include <boost/any.hpp>
 #include "RabitMessageQueue.h"
+#include "RabitNonBlockingSPSCQueue.h"
 #include "PublishSubscribeMessage.h"
 #include "MessageNotRegisteredException.h"
 
@@ -26,6 +27,17 @@ namespace Rabit
     {
 
     private:
+        enum MsgQueueType_e
+        {
+            MQT_MPMC,       //Multiple Provider, Multiple Consumer, Mutex Locked
+            MQT_SPSC,       //Single Provider, Single Consumer, Non-Locked.
+        };
+
+        struct MsgQueueStruct
+        {
+            MsgQueueType_e MsgQueueType;
+            boost::any QueuePtr;
+        };
 
         static RabitWorkspace *_rabitWorkspace;
 
@@ -35,7 +47,7 @@ namespace Rabit
             std::shared_ptr<PublishSubscribeMessage> PSMsg;
         };
 
-        std::unordered_map<std::string, boost::any> _messageQueueDict;
+        std::unordered_map<std::string, MsgQueueStruct> _messageQueueDict;
         std::unordered_map<std::string, std::unique_ptr<PSMsgContainer> > _publishSubscribeMsgDict;
         std::shared_ptr<RabitMessage> _tmp;
 
@@ -65,7 +77,19 @@ namespace Rabit
         template<typename T>
         void AddManagerMessageQueue(std::string name, std::shared_ptr<RabitMessageQueue<T>> queue)
         {
-            _messageQueueDict[name] = queue;
+            MsgQueueStruct mqs;
+            mqs.MsgQueueType = MQT_MPMC;
+            mqs.QueuePtr = queue;
+            _messageQueueDict[name] = mqs;
+        }
+
+        template<typename T>
+        void AddManagerMessageQueue(std::string name, std::shared_ptr<RabitNonBlockingSPSCQueue<T>> queue)
+        {
+            MsgQueueStruct mqs;
+            mqs.MsgQueueType = MQT_SPSC;
+            mqs.QueuePtr = queue;
+            _messageQueueDict[name] = mqs;
         }
 
         template<typename T>
@@ -76,19 +100,43 @@ namespace Rabit
             {
                 throw MessageNotRegisteredException(name);
             }
-            return boost::any_cast<T>(_messageQueueDict[name]);
+            MsgQueueStruct mqs = _messageQueueDict[name];
+            return boost::any_cast<T>(mqs.QueuePtr);
+            /************************************
+            if (mqs.MsgQueueType == MQT_MPMC)
+            {
+                return boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(mqs.QueuePtr);
+            }
+            else
+            {
+                return boost::any_cast<std::shared_ptr<RabitNonBlockingSPSCQueue<T>>>(mqs.QueuePtr);
+            }
+             ***********************/
         }
 
+        //Add a message to a Standard Message Queue.
         template<typename T>
-        void AddMessageToQueue(std::string name, T msg)
+        bool AddMessageToQueue(std::string name, T msg)
         {
+            bool msgAddedToQueue = false;
             auto search = _messageQueueDict.find(name);
-            if (search == _messageQueueDict.end())
+            if (search != _messageQueueDict.end())
             {
-                throw MessageNotRegisteredException(name);
+                MsgQueueStruct mqs = _messageQueueDict[name];
+                if (mqs.MsgQueueType == MQT_MPMC)
+                {
+                    msgAddedToQueue = boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>
+                                                              (mqs.QueuePtr)->AddMessage(msg);
+                }
+                else
+                {
+                    msgAddedToQueue = boost::any_cast<std::shared_ptr<RabitNonBlockingSPSCQueue<T>>>
+                                                              (mqs.QueuePtr)->AddMessage(msg);
+                }
             }
-            boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->AddMessage(msg);
+            return msgAddedToQueue;
         }
+
 
         //Register an event when a message is added to the Queue.
         template<typename T>
@@ -99,8 +147,18 @@ namespace Rabit
             {
                 throw MessageNotRegisteredException(name);
             }
-            boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->Register_SomethingEnqueued(
-                    handler);
+            MsgQueueStruct mqs = _messageQueueDict[name];
+            if (mqs.MsgQueueType == MQT_MPMC)
+            {
+                boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>
+                                        (mqs.QueuePtr)->Register_SomethingEnqueued(handler);
+            }
+            else
+            {
+                boost::any_cast<std::shared_ptr<RabitNonBlockingSPSCQueue<T>>>
+                                        (mqs.QueuePtr)->Register_SomethingEnqueued(handler);
+
+            }
         }
 
         //Register an event when a message is pulled from the Queue.
@@ -112,8 +170,17 @@ namespace Rabit
             {
                 throw MessageNotRegisteredException(name);
             }
-            boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>(_messageQueueDict[name])->Register_SomethingDequeued(
-                    handler);
+            MsgQueueStruct mqs = _messageQueueDict[name];
+            if (mqs.MsgQueueType == MQT_MPMC)
+            {
+                boost::any_cast<std::shared_ptr<RabitMessageQueue<T>>>
+                                        (mqs.QueuePtr)->Register_SomethingDequeued(handler);
+            }
+            else
+            {
+                boost::any_cast<std::shared_ptr<RabitNonBlockingSPSCQueue<T>>>
+                                        (mqs.QueuePtr)->Register_SomethingDequeued(handler);
+            }
         }
 
         bool AddPublishSubscribeMessage(std::string name, std::shared_ptr<RabitMessage> msg)
@@ -127,12 +194,14 @@ namespace Rabit
                 psMsgContainer->PSMsg = std::make_shared<PublishSubscribeMessage>(msg->Clone());
                 msg->GlobalPublishSubscribeMessageRef(psMsgContainer->PSMsg);
                 _publishSubscribeMsgDict[name] = std::move(psMsgContainer);
-            } else
+            }
+            else
             {
                 if (_publishSubscribeMsgDict[name]->PSMsg->MsgTypeIndex() == msg->GetTypeIndex())
                 {
                     msg->GlobalPublishSubscribeMessageRef(_publishSubscribeMsgDict[name]->PSMsg);
-                } else
+                }
+                else
                 {
                     error = false;
                 }
