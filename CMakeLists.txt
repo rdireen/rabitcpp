@@ -31,6 +31,8 @@ option(WITHTESTS "Compile code with unit tests and integration tests" OFF)
 option(WITHEXAMPLES "Compile code with examples" OFF)
 option(WITHCOVERAGE "Compile code with code coverage (for online CI)" OFF)
 
+#set(WITHTESTS true)
+#set(WITHEXAMPLES true)
 
 # add the binary tree to the search path for include files
 # so that we will find rabitConfig.h

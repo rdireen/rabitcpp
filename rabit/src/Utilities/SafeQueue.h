@@ -21,9 +21,11 @@ namespace Rabit
     class SafeQueue
     {
     public:
-        SafeQueue(void)
+        SafeQueue(int maxQueueSize)
                 : q(), m(), c()
-        {}
+        {
+            _queueMaxSize = maxQueueSize;
+        }
 
         SafeQueue(const SafeQueue &other) = delete; // non construction-copyable
         SafeQueue &operator=(const SafeQueue &) = delete; // non copyable
@@ -31,23 +33,41 @@ namespace Rabit
         ~SafeQueue(void)
         {}
 
-        void enqueue(T t)
+        int GetMaxQueueSize()
         {
-            std::lock_guard<std::mutex> lock(m);
-            q.push(t);
-            //c.notify_one();
+            return _queueMaxSize;
         }
 
-        T dequeue(void)
+        //Add an item to the queue... the queue is checked to see if it is
+        //full first...
+        //Returns true if the item is added to the queue.
+        //Return false if the queue is full.
+        bool enqueue(T t)
+        {
+            std::lock_guard<std::mutex> lock(m);
+            bool ok = false;
+            if(q.size() < _queueMaxSize)
+            {
+                q.push(t);
+                ok = true;
+            }
+            return ok;
+        }
+
+        //Pull and item from the queue.
+        //Returns true if item obtained.
+        //Returns false if the queue is empty.
+        bool dequeue(T &item)
         {
             std::unique_lock<std::mutex> lock(m);
-            //while(q.empty())
-            //{
-            //c.wait(lock);
-            //}
-            T val = q.front();
-            q.pop();
-            return val;
+            bool ok = false;
+            if (!q.empty())
+            {
+                item = q.front();
+                q.pop();
+                ok = true;
+            }
+            return ok;
         }
 
         void clear()
@@ -59,9 +79,8 @@ namespace Rabit
 
         int size()
         {
-            //Should not need to lock on checking size
-            //std::lock_guard<std::mutex> lock(m);
-            return q.size();
+            std::lock_guard<std::mutex> lock(m);
+            return (int)q.size();
         }
 
         bool empty()
@@ -73,6 +92,7 @@ namespace Rabit
         std::queue<T> q;
         mutable std::mutex m;
         std::condition_variable c;
+        int _queueMaxSize = 1000;
     };
 }
 

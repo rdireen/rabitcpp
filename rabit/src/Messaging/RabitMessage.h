@@ -10,6 +10,7 @@
  *******************************************************************/
 
 #include <chrono>
+#include <atomic>
 #include <string>
 #include <memory>
 #include <typeinfo>
@@ -47,6 +48,7 @@ namespace Rabit
             _timeStamp = std::chrono::high_resolution_clock::now();
         }
 
+
         virtual std::unique_ptr<RabitMessage> Clone()
         {}
 
@@ -81,6 +83,13 @@ namespace Rabit
         const TimeStamp &GetTimeStamp() const
         {
             return _timeStamp;
+        }
+
+        double TimeStampSeconds() const
+        {
+            using std::chrono::duration_cast;
+            using std::chrono::duration;
+            return (duration_cast<duration<double>>(_timeStamp.time_since_epoch())).count();
         }
 
         bool Register_SomethingPublished(const boost::function<void()> &handler);

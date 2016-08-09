@@ -31,45 +31,49 @@ using namespace Rabit;
  * CensorManager (using a RabitMessageQueue) to be censored for sensitive
  * information.
  ****************************************************************************/
-class StringManager : public RabitManager{
+class StringManager : public RabitManager
+{
 
 private:
     int _counter = 0;
     shared_ptr<RabitMessageQueue<std::string>> _inqueue_sptr;
 public:
 
-  StringManager(string name ) : RabitManager(name){
+    StringManager(string name) : RabitManager(name)
+    {
 
-    // This is the amount of time the manager waits before waking up. If an event
-    // has been setup, it will wakeup before the timeout.
-    this->SetWakeupTimeDelayMSec(30);
-    _inqueue_sptr = make_shared<RabitMessageQueue<std::string>>(100, "instrings");
-    this->AddManagerMessageQueue(_inqueue_sptr->GetMessageQueueName(), _inqueue_sptr);
+        // This is the amount of time the manager waits before waking up. If an event
+        // has been setup, it will wakeup before the timeout.
+        this->SetWakeupTimeDelayMSec(30);
+        _inqueue_sptr = make_shared<RabitMessageQueue<std::string>>(100, "instrings");
+        this->AddManagerMessageQueue(_inqueue_sptr->GetMessageQueueName(), _inqueue_sptr);
 
-    _inqueue_sptr->AddMessage("Dear Mom,");
-    _inqueue_sptr->AddMessage("Today I walked around downtown with a dollar");
-    _inqueue_sptr->AddMessage("in my pocket and was stopped by a homeless man.");
-    _inqueue_sptr->AddMessage("He asked me if I knew of any good pawn stores");
-    _inqueue_sptr->AddMessage("he might have luck selling his teeth too. Being ");
-    _inqueue_sptr->AddMessage("the guy I am, I remembered the dollar in my pocket");
-    _inqueue_sptr->AddMessage("and then punched that man in the face. I had to use");
-    _inqueue_sptr->AddMessage("the dollar to buy a bandaid because his teeth weren't ");
-    _inqueue_sptr->AddMessage("worth too much.");
-    _inqueue_sptr->AddMessage("end");
-  }
+        _inqueue_sptr->AddMessage("Dear Mom,");
+        _inqueue_sptr->AddMessage("Today I walked around downtown with a dollar");
+        _inqueue_sptr->AddMessage("in my pocket and was stopped by a homeless man.");
+        _inqueue_sptr->AddMessage("He asked me if I knew of any good pawn stores");
+        _inqueue_sptr->AddMessage("he might have luck selling his teeth too. Being ");
+        _inqueue_sptr->AddMessage("the guy I am, I remembered the dollar in my pocket");
+        _inqueue_sptr->AddMessage("and then punched that man in the face. I had to use");
+        _inqueue_sptr->AddMessage("the dollar to buy a bandaid because his teeth weren't ");
+        _inqueue_sptr->AddMessage("worth too much.");
+        _inqueue_sptr->AddMessage("end");
+    }
 
-  void ExecuteUnitOfWork() final {
-      if(_inqueue_sptr->NoMessagesInQueue() > 0){
-        string next = _inqueue_sptr->GetMessage();
+    void ExecuteUnitOfWork() final
+    {
+        string next;
+        if (_inqueue_sptr->GetMessage(next))
+        {
+            // This is how we communicate with the CensorManager. The CensorManager has
+            // added a RabitMessageQueue to the RabitWorkspace
+            this->AddMessageToQueue("rawstrings", next);
+        } else
+        {
+            this->ShutdownManager();
+        }
+    }
 
-        // This is how we communicate with the CensorManager. The CensorManager has
-        // added a RabitMessageQueue to the RabitWorkspace
-        this->AddMessageToQueue("rawstrings", next);
-      } else {
-        this->ShutdownManager();
-      }
-  }
-  
 };
 
 /****************************************************************************
@@ -77,121 +81,132 @@ public:
  * sensitive information. Once the strings have been censored, they are then
  * sent to the ConsoleManager so that they can be displayed on the screen.
  ****************************************************************************/
-class CensorManager : public Rabit::RabitManager{
+class CensorManager : public Rabit::RabitManager
+{
 private:
     int _counter = 0;
     shared_ptr<RabitMessageQueue<std::string>> _rqueue_sptr;
     vector<string> _cstrings;
 public:
 
-  CensorManager(string name) : RabitManager(name){
+    CensorManager(string name) : RabitManager(name)
+    {
 
-    // This is the amount of time the manager waits before waking up. If an event
-    // has been setup, it will wakeup before the timeout.
-    this->SetWakeupTimeDelayMSec(1000);
+        // This is the amount of time the manager waits before waking up. If an event
+        // has been setup, it will wakeup before the timeout.
+        this->SetWakeupTimeDelayMSec(1000);
 
-    // This is how we add message queue to the RabitWorkspace
-    _rqueue_sptr = make_shared<RabitMessageQueue<std::string>>(100, "rawstrings");
-    this->AddManagerMessageQueue(_rqueue_sptr->GetMessageQueueName(), _rqueue_sptr);
+        // This is how we add message queue to the RabitWorkspace
+        _rqueue_sptr = make_shared<RabitMessageQueue<std::string>>(100, "rawstrings");
+        this->AddManagerMessageQueue(_rqueue_sptr->GetMessageQueueName(), _rqueue_sptr);
 
-    _cstrings = vector<string>();
-    _cstrings.push_back("Mom");
-    _cstrings.push_back("downtown");
-    _cstrings.push_back("dollar");
-    _cstrings.push_back("pocket");
-    _cstrings.push_back("homeless");
-    _cstrings.push_back("pawn");
-    _cstrings.push_back("stores");
-    _cstrings.push_back("selling");
-    _cstrings.push_back("teeth");
-    _cstrings.push_back("guy");
-    _cstrings.push_back("face");
-    _cstrings.push_back("bandaid");
-    _cstrings.push_back("worth");
-    
-    // This is how we know someone has placed an item into the queue we setup.
-    //_rqueue_sptr->Register_SomethingEnqueued(boost::bind(&CensorManager::WakeUpManagerEH, this));
-    this->WakeUpManagerOnEnqueue(_rqueue_sptr);
-  }
+        _cstrings = vector<string>();
+        _cstrings.push_back("Mom");
+        _cstrings.push_back("downtown");
+        _cstrings.push_back("dollar");
+        _cstrings.push_back("pocket");
+        _cstrings.push_back("homeless");
+        _cstrings.push_back("pawn");
+        _cstrings.push_back("stores");
+        _cstrings.push_back("selling");
+        _cstrings.push_back("teeth");
+        _cstrings.push_back("guy");
+        _cstrings.push_back("face");
+        _cstrings.push_back("bandaid");
+        _cstrings.push_back("worth");
 
-  void ExecuteUnitOfWork() final {
-
-    for(int n = 0; n < _rqueue_sptr->NoMessagesInQueue(); n++){
-      auto val = _rqueue_sptr->GetMessage();
-
-      if(val == "end"){
-        this->ShutdownManager();
-        this->AddMessageToQueue("printstrings", val);
-      }
-      else{
-        for (int m = 0; m < _cstrings.size(); m++){
-            int index = 0;
-            index = val.find(_cstrings[m], index);
-            if (index != std::string::npos){
-              string c = string(_cstrings[m].length(),'*');
-              val.replace(index, _cstrings[m].length(), c);
-            }
-        }
-        this->AddMessageToQueue("printstrings", val);
-      }
+        // This is how we know someone has placed an item into the queue we setup.
+        //_rqueue_sptr->Register_SomethingEnqueued(boost::bind(&CensorManager::WakeUpManagerEH, this));
+        this->WakeUpManagerOnEnqueue(_rqueue_sptr);
     }
 
-  }
-  
+    void ExecuteUnitOfWork() final
+    {
+        string message;
+        while(_rqueue_sptr->GetMessage(message))
+        {
+             if (message == "end")
+            {
+                this->ShutdownManager();
+                this->AddMessageToQueue("printstrings", message);
+            }
+            else
+            {
+                for (int m = 0; m < _cstrings.size(); m++)
+                {
+                    int index = 0;
+                    index = message.find(_cstrings[m], index);
+                    if (index != std::string::npos)
+                    {
+                        string c = string(_cstrings[m].length(), '*');
+                        message.replace(index, _cstrings[m].length(), c);
+                    }
+                }
+                this->AddMessageToQueue("printstrings", message);
+            }
+        }
+
+    }
+
 };
 
 /****************************************************************************
  * This manager receives strings via a RabitMessageQueue and displays them
  * in the console.
  ****************************************************************************/
-class ConsoleManager : public Rabit::RabitManager{
+class ConsoleManager : public Rabit::RabitManager
+{
 private:
     int _counter = 0;
     shared_ptr<RabitMessageQueue<std::string>> _cqueue_sptr;
 public:
 
-  ConsoleManager(string name ) : RabitManager(name){
-    this->SetWakeupTimeDelayMSec(1000);
-    _cqueue_sptr = make_shared<RabitMessageQueue<std::string>>(100, "printstrings");
-    this->AddManagerMessageQueue(_cqueue_sptr->GetMessageQueueName(), _cqueue_sptr);
-    //_cqueue_sptr->Register_SomethingEnqueued(boost::bind(&ConsoleManager::WakeUpManagerEH, this));
-    this->WakeUpManagerOnEnqueue(_cqueue_sptr);
-  }
-
-  void ExecuteUnitOfWork() final {
-    for(int n = 0; n < _cqueue_sptr->NoMessagesInQueue(); n++){
-        auto val = _cqueue_sptr->GetMessage();
-        if(val == "end")
-          this->ShutdownManager();
-        else
-          cout << val << endl;
+    ConsoleManager(string name) : RabitManager(name)
+    {
+        this->SetWakeupTimeDelayMSec(1000);
+        _cqueue_sptr = make_shared<RabitMessageQueue<std::string>>(100, "printstrings");
+        this->AddManagerMessageQueue(_cqueue_sptr->GetMessageQueueName(), _cqueue_sptr);
+        //_cqueue_sptr->Register_SomethingEnqueued(boost::bind(&ConsoleManager::WakeUpManagerEH, this));
+        this->WakeUpManagerOnEnqueue(_cqueue_sptr);
     }
 
-  }
+    void ExecuteUnitOfWork() final
+    {
+        string message;
+        while(_cqueue_sptr->GetMessage(message))
+        {
+            if (message == "end")
+                this->ShutdownManager();
+            else
+                cout << message << endl;
+        }
+
+    }
 
 };
 
 typedef std::unique_ptr<Rabit::RabitManager> ManagerPtr;
 
-int main(int argc, char* argv[]) {
-  
-  std::cout << "***************************************************" << std::endl;
-  std::cout << "*              Publish and Event                  *" << std::endl;
-  std::cout << "***************************************************" << std::endl;
-  std::cout << std::endl;
+int main(int argc, char *argv[])
+{
 
-  auto rr = make_shared<RabitMessageQueue<std::string>>(10,"mine");
-  
-  auto stringM = ManagerPtr(new StringManager("StringManager"));
-  auto censorM = ManagerPtr(new CensorManager("CensorManager"));
-  auto consoleM = ManagerPtr(new ConsoleManager("ConsoleManager"));
-  
-  auto reactor = Rabit::RabitReactor();
-  
-  reactor.AddManager(std::move(stringM));
-  reactor.AddManager(std::move(censorM));
-  reactor.AddManager(std::move(consoleM));
-  
-  reactor.Run();
-  
+    std::cout << "***************************************************" << std::endl;
+    std::cout << "*              Publish and Event                  *" << std::endl;
+    std::cout << "***************************************************" << std::endl;
+    std::cout << std::endl;
+
+    auto rr = make_shared<RabitMessageQueue<std::string>>(10, "mine");
+
+    auto stringM = ManagerPtr(new StringManager("StringManager"));
+    auto censorM = ManagerPtr(new CensorManager("CensorManager"));
+    auto consoleM = ManagerPtr(new ConsoleManager("ConsoleManager"));
+
+    auto reactor = Rabit::RabitReactor();
+
+    reactor.AddManager(std::move(stringM));
+    reactor.AddManager(std::move(censorM));
+    reactor.AddManager(std::move(consoleM));
+
+    reactor.Run();
+
 }

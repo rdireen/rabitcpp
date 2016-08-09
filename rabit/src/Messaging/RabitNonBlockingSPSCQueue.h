@@ -7,23 +7,29 @@
  *
  *******************************************************************/
 
-#ifndef RABIT_MESSAGE_QUEUE
-#define RABIT_MESSAGE_QUEUE
+#ifndef RABIT_DEV_RABITNONBLOCKINGSPSCQUEUE_H
+#define RABIT_DEV_RABITNONBLOCKINGSPSCQUEUE_H
 
 #include <string>
 #include <memory>
 #include <boost/signals2.hpp>
-#include "SafeQueue.h"
+#include <boost/lockfree/spsc_queue.hpp>
 
 namespace Rabit
 {
 
-    //The Rabit Message Queue is a wrapper for Std Lib Queue.
-    //The Rabit Message Queue adds Mutex locking for thread safety.
+    //The Rabit Message Queue is a wrapper for the Boost lockfree  Single-producer
+    //Single-Consumer Queue. (http://www.boost.org/doc/libs/1_60_0/doc/html/lockfree.html)
+    //(http://www.boost.org/doc/libs/1_60_0/doc/html/boost/lockfree/spsc_queue.html)
+    //The data type T must:
+    //  T must have a default constructor
+    //  T must be copyable
+    //More often than not, a message queue passes a pointer to a message object
+    //so the requirements will be met.  The Queue works with sharted_ptr(s).
     //The Rabit Message Queue adds event signals which can be used to indicate
     //that a message has been added or removed from the queue.
     template<class T>
-    class RabitMessageQueue
+    class RabitNonBlockingSPSCQueue
     {
 
     private:
@@ -31,7 +37,10 @@ namespace Rabit
 
         std::string _msgQueueName;
 
-        std::unique_ptr<SafeQueue<T>> _messQueue;
+    private:
+        int _maxNumberOfMessages = 0;
+
+        std::unique_ptr<boost::lockfree::spsc_queue<T>> _messQueue;
 
         boost::signals2::signal<void()> _sigEnqueue;
         boost::signals2::signal<void()> _sigDequeue;
@@ -48,7 +57,7 @@ namespace Rabit
 
         int GetMaxNoMessagesAllowedInQueue()
         {
-            return _messQueue->GetMaxQueueSize();
+            return _maxNumberOfMessages;
         }
 
 
@@ -57,14 +66,15 @@ namespace Rabit
         //Instantiate a new Queue... the maxNoMessages is the maximum
         //number of items the Queue can hold.
         //The msgQName is the the name the queue will be accessed by.
-        RabitMessageQueue(int maxNoMessages, std::string msgQName)
+        RabitNonBlockingSPSCQueue(int maxNoMessages, std::string msgQName)
         {
-             _msgQueueName = msgQName.empty() ? "MessageQueue" : msgQName;
+            _msgQueueName = msgQName.empty() ? "MessageQueue" : msgQName;
 
             maxNoMessages = maxNoMessages < 1 ? 1 : maxNoMessages;
             maxNoMessages = maxNoMessages > UPPER_BOUND ? UPPER_BOUND : maxNoMessages;
+            _maxNumberOfMessages = maxNoMessages;
 
-            _messQueue = std::unique_ptr<SafeQueue<T>>(new SafeQueue<T>(maxNoMessages));
+            _messQueue = std::unique_ptr<boost::lockfree::spsc_queue<T>>(new boost::lockfree::spsc_queue<T>(maxNoMessages));
         }
 
 
@@ -83,32 +93,21 @@ namespace Rabit
 
         void ClearMessageQueue()
         {
-            _messQueue->clear();
+            T item;
+             while(_messQueue->pop(item) > 0);
         }
 
-        int NoMessagesInQueue()
-        {
-            return _messQueue->size();
-        }
-
-
-        //Check to see if the Queue is currently empty
-        //Returns true if empty, false otherwise.
-        bool IsEmpty()
-        {
-            return _messQueue->empty();
-        }
 
         //Add a message to the Queue.
         //Returns true if the message was added to the queue...
         //returns false if the the queue is full and the message could not be
         //added.
-        bool AddMessage(T msg)
+        bool AddMessage(T const &msg)
         {
-            bool msgAddedToQueue = _messQueue->enqueue(msg);
+            bool msgAddedToQueue = _messQueue->push(msg);
             _sigEnqueue();
             return msgAddedToQueue;
-         }
+        }
 
 
         //Add a message to the Queue.
@@ -116,9 +115,9 @@ namespace Rabit
         //returns false if the the queue is full and the message could not be
         //added.
         //This method does not trigger a push-message event.
-        bool AddMessageNoEventTrigger(T msg)
+        bool AddMessageNoEventTrigger(T const &msg)
         {
-            return _messQueue->enqueue(msg);
+            return _messQueue->push(msg);
         }
 
         //Get a message from the Message Queue.
@@ -126,17 +125,16 @@ namespace Rabit
         //Returns false if the message queue is empty.
         bool GetMessage(T &msg)
         {
-            bool msgObtained = _messQueue->dequeue(msg);
-            if(msgObtained)
+            int noMsgsPopped = _messQueue->pop(msg);
+            if(noMsgsPopped > 0)
             {
                 _sigDequeue();
             }
-            return msgObtained;
+            return noMsgsPopped > 0 ? true : false;
         }
 
     };
 
 }
 
-
-#endif //RABIT_MESSAGE_QUEUE
+#endif //RABIT_DEV_RABITNONBLOCKINGSPSCQUEUE_H

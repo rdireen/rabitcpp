@@ -119,7 +119,7 @@ namespace Rabit
                         //Reset the Manager Run-Time clock;
                         _mgrTotalTimeSec.reset();
                         lastPublishStatsTimeSec = 0;
-                        std::cout << "Clear Mgr Stats: " << _managerName << std::endl;
+                        //std::cout << "Clear Mgr Stats: " << _managerName << std::endl;
                         //std::cout << _managerName << "_MgrStats:" << std::endl
                         //          << _mgrStatus_sptr->ManagerStats.ToString() << std::endl;
 
