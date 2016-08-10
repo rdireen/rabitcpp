@@ -1,3 +1,7 @@
 build/
+Build/
 *.user
 *swp
+.idea/
+*~
+

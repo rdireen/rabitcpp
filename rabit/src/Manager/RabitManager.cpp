@@ -157,12 +157,15 @@ namespace Rabit
                 _mgrStatus_sptr->ManagerStats.UpdateExeUnitOfWorkTimeStats(_execUnitOfWorkTime.getTimeElapsed());
                 _mgrStatus_sptr->ManagerStats.UpdateSleepTimeStats(_sleepTime.getTimeElapsed());
 
-                if ((currentMgrTimeSec - lastPublishStatsTimeSec) > publishStatsTimeSec)
+                if( publishStatsTimeSec > 0)  //Publishing of States may be disabled by setting publishStatsTimeSec = 0;
                 {
-                    lastPublishStatsTimeSec = currentMgrTimeSec;
-                    _mgrStatus_sptr->PostMessage();
-                    //std::cout << _managerName << "_MgrStats:" << std::endl
-                    //          << _mgrStatus_sptr->ManagerStats.ToString() << std::endl;
+                    if ((currentMgrTimeSec - lastPublishStatsTimeSec) > publishStatsTimeSec)
+                    {
+                        lastPublishStatsTimeSec = currentMgrTimeSec;
+                        _mgrStatus_sptr->PostMessage();
+                        //std::cout << _managerName << "_MgrStats:" << std::endl
+                        //          << _mgrStatus_sptr->ManagerStats.ToString() << std::endl;
+                    }
                 }
 
             }

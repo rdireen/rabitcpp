@@ -30,7 +30,7 @@ namespace Rabit
         bool ResetMgrStatsToggle = false;
 
         //PulishMgrStatsTime_Sec controls how often the Manager
-        //Stats are published.  A value less than zero will disable
+        //Stats are published.  A value of zero or less will disable
         //publishing the manager stats.
         float PulishMgrStatsTime_Sec = 10.0;
 
