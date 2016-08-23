@@ -29,13 +29,13 @@ public:
 
 public:
 
-  MessageA(std::string name) : Rabit::RabitMessage(name){
+  MessageA() : Rabit::RabitMessage(){
     a = 0;
     b = 1;
   }
 
-  virtual std::unique_ptr<Rabit::RabitMessage> Clone() final{
-    std::unique_ptr<MessageA> clone = std::unique_ptr<MessageA>(new MessageA(GetMessageTypeName()));
+  virtual std::unique_ptr<Rabit::RabitMessage> Clone() const final{
+    std::unique_ptr<MessageA> clone = std::unique_ptr<MessageA>(new MessageA());
     clone->CopyBase(this);
     clone->a = this->a;
     clone->b = this->b;
@@ -71,12 +71,12 @@ public:
   string message;
 public:
 
-  MessageB(std::string name) : Rabit::RabitMessage(name){
+  MessageB() : Rabit::RabitMessage(){
     message = "none";
   }
 
-  virtual std::unique_ptr<Rabit::RabitMessage> Clone() final{
-    std::unique_ptr<MessageB> clone = std::unique_ptr<MessageB>(new MessageB(GetMessageTypeName()));
+  virtual std::unique_ptr<Rabit::RabitMessage> Clone() const final{
+    std::unique_ptr<MessageB> clone = std::unique_ptr<MessageB>(new MessageB());
     clone->CopyBase(this);
     clone->message = this->message;
     return std::move(clone);
@@ -118,8 +118,8 @@ public:
     // This is the amount of time the manager waits before waking up. If an event
     // has been setup, it will wakeup before the timeout.
     this->SetWakeupTimeDelayMSec(500);
-    _messageA_sptr = make_shared<MessageA>("MessageA");
-    this->AddPublishSubscribeMessage(_messageA_sptr->GetMessageTypeName(), _messageA_sptr);
+    _messageA_sptr = make_shared<MessageA>();
+    this->AddPublishSubscribeMessage("MessageA", _messageA_sptr);
   }
 
   void ExecuteUnitOfWork() final {
@@ -143,8 +143,8 @@ public:
 
 
     this->SetWakeupTimeDelayMSec(5000);
-    _messageA_sptr = make_shared<MessageA>("MessageA");
-    this->AddPublishSubscribeMessage(_messageA_sptr->GetMessageTypeName(), _messageA_sptr);
+    _messageA_sptr = make_shared<MessageA>();
+    this->AddPublishSubscribeMessage("MessageA", _messageA_sptr);
     // This sets the event
     this->WakeUpManagerOnMessagePost(_messageA_sptr);
   }

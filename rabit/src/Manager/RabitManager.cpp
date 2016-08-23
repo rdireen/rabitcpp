@@ -19,22 +19,22 @@ namespace Rabit
         _mgrMessageQueue_sptr = std::make_shared<RabitQueue>(1000, name);
         _shutdownManager = false;
 
-        _mgrControlAllMgrs_sptr = std::make_shared<ManagerControlMessage>("ManagerControlMessage");
-        this->AddPublishSubscribeMessage(_mgrControlAllMgrs_sptr->GetMessageTypeName(), _mgrControlAllMgrs_sptr);
+        _mgrControlAllMgrs_sptr = std::make_shared<ManagerControlMessage>();
+        this->AddPublishSubscribeMessage("ManagerControlMessage", _mgrControlAllMgrs_sptr);
         _mgrControlAllMgrs_sptr->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
 
         //This Manager may be controlled with a Manager Control Message with Name:  "MngName:ManagerControlMessage"
         tmpStr = _managerName + ":ManagerControlMessage";
-        _mgrControlThisMgr_sptr = std::make_shared<ManagerControlMessage>(tmpStr);
-        this->AddPublishSubscribeMessage(_mgrControlThisMgr_sptr->GetMessageTypeName(), _mgrControlThisMgr_sptr);
+        _mgrControlThisMgr_sptr = std::make_shared<ManagerControlMessage>();
+        this->AddPublishSubscribeMessage(tmpStr, _mgrControlThisMgr_sptr);
         _mgrControlThisMgr_sptr->Register_SomethingPublished(boost::bind(&RabitManager::WakeUpManagerEH, this));
 
-        std::cout << "MgrControlMsgName=" << _mgrControlThisMgr_sptr->GetMessageTypeName() << std::endl;
+        std::cout << "MgrControlMsgName=" << tmpStr << std::endl;
 
         //This Manager Status and Stats Message Name:  "MngName:ManagerStatusMessage"
         tmpStr = _managerName + ":ManagerStatusMessage";
-        _mgrStatus_sptr = std::make_shared<ManagerStatusMessage>(tmpStr);
-        this->AddPublishSubscribeMessage(_mgrStatus_sptr->GetMessageTypeName(), _mgrStatus_sptr);
+        _mgrStatus_sptr = std::make_shared<ManagerStatusMessage>();
+        this->AddPublishSubscribeMessage(tmpStr, _mgrStatus_sptr);
 
         _mgrStatus_sptr->ManagerName = _managerName;
         _mgrStatus_sptr->RunningState = ManagerStatusMessage::MgrState_Startup;

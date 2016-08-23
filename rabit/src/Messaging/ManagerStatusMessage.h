@@ -52,20 +52,15 @@ namespace Rabit
 
 
     public:
-        ManagerStatusMessage(std::string name) : RabitMessage(name)
+        ManagerStatusMessage() : RabitMessage()
         {
             ManagerStats.Clear();
         }
 
-        virtual std::unique_ptr<RabitMessage> Clone() final
+
+        virtual std::unique_ptr<RabitMessage> Clone() const final
         {
-            auto clone = std::unique_ptr<ManagerStatusMessage>(new ManagerStatusMessage(GetMessageTypeName()));
-            clone->CopyBase(this);
-            clone->ManagerName = this->ManagerName;
-            clone->RunningState = this->RunningState;
-            clone->ErrorCondition = this->ErrorCondition;
-            clone->ErrorCode = this->ErrorCode;
-            clone->ManagerStats = this->ManagerStats;
+            auto clone = std::unique_ptr<ManagerStatusMessage>(new ManagerStatusMessage(*this));
             return std::move(clone);
         }
 
@@ -75,11 +70,8 @@ namespace Rabit
             if (msg->GetTypeIndex() == std::type_index(typeid(ManagerStatusMessage)))
             {
                 ManagerStatusMessage* msMsg = static_cast<ManagerStatusMessage *>(msg);
+                *this = *msMsg;
                 this->ManagerName = msMsg->ManagerName;
-                this->RunningState = msMsg->RunningState;
-                this->ErrorCondition = msMsg->ErrorCondition;
-                this->ErrorCode = msMsg->ErrorCode;
-                this->ManagerStats = msMsg->ManagerStats;
                 return true;
             }
             return false;

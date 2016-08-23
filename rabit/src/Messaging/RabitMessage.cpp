@@ -21,7 +21,7 @@ namespace Rabit
             gpsm->Register_SomethingPublished(handler);
         } else
         {
-            throw GlobalPublishSubscribeException(GetMessageTypeName());
+            throw GlobalPublishSubscribeException();
         }
     }
 
@@ -33,7 +33,7 @@ namespace Rabit
             gpsm->PostMessage(this);
         } else
         {
-            throw GlobalPublishSubscribeException(GetMessageTypeName());
+            throw GlobalPublishSubscribeException();
         }
     }
 
@@ -46,7 +46,7 @@ namespace Rabit
             messChanged = gpsm->FetchMessage(this);
         } else
         {
-            throw GlobalPublishSubscribeException(GetMessageTypeName());
+            throw GlobalPublishSubscribeException();
         }
         return messChanged;
     }

@@ -43,6 +43,10 @@ namespace Rabit
 
         struct PSMsgContainer
         {
+            //Keep message alive until incase manager shuts down.
+            //I'm not sure this is necessary... but it does not hurt.
+            //The reference will only keep the first message that was used
+            //to create a new publish/subscribe message alive.
             std::shared_ptr<RabitMessage> MgrMsgRef;
             std::shared_ptr<PublishSubscribeMessage> PSMsg;
         };

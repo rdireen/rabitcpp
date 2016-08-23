@@ -31,14 +31,6 @@ namespace Rabit
             _message = "Attempting to get copy of global message without a reference to the global message established";
         }
 
-        GlobalPublishSubscribeException(std::string messageName)
-        {
-            std::ostringstream os;
-            os << messageName
-               << ": Attempting to get copy of global message without a reference to the global message established.";
-            _message = os.str();
-        }
-
         virtual const char *what() const throw()
         {
             return _message.c_str();

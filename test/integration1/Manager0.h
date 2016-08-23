@@ -15,8 +15,8 @@ public:
   Manager0(std::string name ) : RabitManager(name){
 
     this->SetWakeupTimeDelayMSec(10);
-    _message1_sptr = std::make_shared<Message1>("Message1");
-    this->AddPublishSubscribeMessage(_message1_sptr->GetMessageTypeName(), _message1_sptr);
+    _message1_sptr = std::make_shared<Message1>();
+    this->AddPublishSubscribeMessage("Message1", _message1_sptr);
 
   }
 

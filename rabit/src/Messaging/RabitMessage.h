@@ -27,7 +27,8 @@ namespace Rabit
     protected:
         typedef std::chrono::high_resolution_clock::time_point TimeStamp;
         TimeStamp _timeStamp;
-        std::string _messageTypeName;
+
+        //An optional reference to the global publish/subsribe message.
         std::shared_ptr<PublishSubscribeMessage> _globalPublishSubscribeMessageRef = nullptr;
 
     public:
@@ -42,20 +43,29 @@ namespace Rabit
         }
 
     public:
-        RabitMessage(std::string messageTypeName)
+        RabitMessage()
         {
-            _messageTypeName = messageTypeName;
             _timeStamp = std::chrono::high_resolution_clock::now();
         }
 
 
-        virtual std::unique_ptr<RabitMessage> Clone()
-        {}
+        //Clone is required to support the Publish/subscribe Message Process.
+        //The standard Clone format is:
+        //  virtual std::unique_ptr<DerivedRabitMsg> Clone() const
+        //     {
+        //         std::unique_ptr<DerivedRabitMsg> cloneMsg = std::unique_ptr<DerivedRabitMsg>(new DerivedRabitMsg(*this));
+        //         return std::move(cloneMsg);
+        //     }
+        virtual std::unique_ptr<RabitMessage> Clone() const = 0;
 
-        virtual bool CopyMessage(RabitMessage *msg)
+
+        //Copy message specifically does not copy the
+        //_globalPublishSubscribeMessageRef nor the message Type Name
+        //the messages must be of the same type.
+        virtual bool CopyMessage(const RabitMessage *msg)
         {
-            _timeStamp = msg->GetTimeStamp();
-            _messageTypeName = msg->GetMessageTypeName();
+            _timeStamp = msg->_timeStamp;
+            //_messageTypeName = msg->GetMessageTypeName();
             return true;
         }
 
@@ -64,12 +74,15 @@ namespace Rabit
         virtual std::string ToString() const
         {}
 
-        void CopyBase(RabitMessage *msg)
+        void CopyBase(const RabitMessage *msg)
         {
             _timeStamp = msg->_timeStamp;
-            _messageTypeName = msg->_messageTypeName;
+            _globalPublishSubscribeMessageRef = msg->_globalPublishSubscribeMessageRef;
         }
 
+        //Get a Unique ID for the Derived Rabit Message type.
+        //This can be used to determine the type of Rabit Message
+        //for message handling routines.
         std::type_index GetTypeIndex()
         {
             return typeid(*this);
@@ -116,11 +129,6 @@ namespace Rabit
                 return true;
             else
                 return false;
-        }
-
-        std::string GetMessageTypeName() const
-        {
-            return _messageTypeName;
         }
 
         virtual ~RabitMessage()

@@ -23,8 +23,8 @@ public:
         this->AddManagerMessageQueue(_squeue_sptr->GetMessageQueueName(), _squeue_sptr);
         this->WakeUpManagerOnEnqueue(_squeue_sptr);
 
-        _message1_sptr = std::make_shared<Message1>("Message1");
-        this->AddPublishSubscribeMessage(_message1_sptr->GetMessageTypeName(), _message1_sptr);
+        _message1_sptr = std::make_shared<Message1>();
+        this->AddPublishSubscribeMessage("Message1", _message1_sptr);
         this->WakeUpManagerOnMessagePost(_message1_sptr);
 
     }

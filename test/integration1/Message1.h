@@ -10,12 +10,12 @@ public:
   int a;
 
 public:
-  Message1(std::string name ) : RabitMessage(name){
+  Message1() : RabitMessage(){
     a = 0;
   }
 
-  virtual std::unique_ptr<Rabit::RabitMessage> Clone() final{
-    auto clone = std::unique_ptr<Message1>(new Message1(GetMessageTypeName()));
+  virtual std::unique_ptr<Rabit::RabitMessage> Clone() const final{
+    auto clone = std::unique_ptr<Message1>(new Message1());
     clone->CopyBase(this);
     clone->a = this->a;
     return std::move(clone);

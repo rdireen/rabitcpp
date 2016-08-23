@@ -29,16 +29,14 @@ public:
 
 public:
 
-  MessageA(std::string name) : Rabit::RabitMessage(name){
+  MessageA() : Rabit::RabitMessage(){
     a = 0;
     b = 1;
   }
 
-  virtual std::unique_ptr<Rabit::RabitMessage> Clone() final{
-    std::unique_ptr<MessageA> clone = std::unique_ptr<MessageA>(new MessageA(GetMessageTypeName()));
-    clone->CopyBase(this);
-    clone->a = this->a;
-    clone->b = this->b;
+
+  virtual std::unique_ptr<Rabit::RabitMessage> Clone() const final{
+    std::unique_ptr<MessageA> clone = std::unique_ptr<MessageA>(new MessageA(*this));
     return std::move(clone);
   }
 
@@ -85,8 +83,8 @@ public:
     // This is the amount of time the manager waits before waking up. If an event
     // has been setup, it will wakeup before the timeout.
     this->SetWakeupTimeDelayMSec(500);
-    _messageA_sptr = make_shared<MessageA>("MessageA");
-    this->AddPublishSubscribeMessage(_messageA_sptr->GetMessageTypeName(), _messageA_sptr);
+    _messageA_sptr = make_shared<MessageA>();
+    this->AddPublishSubscribeMessage("MessageA", _messageA_sptr);
   }
 
   void ExecuteUnitOfWork() final {
@@ -112,8 +110,8 @@ public:
 
     // Change this above and below 500 to see if Fetching Works properly.
     this->SetWakeupTimeDelayMSec(200);
-    _messageA_sptr = make_shared<MessageA>("MessageA");
-    this->AddPublishSubscribeMessage(_messageA_sptr->GetMessageTypeName(), _messageA_sptr);
+    _messageA_sptr = make_shared<MessageA>();
+    this->AddPublishSubscribeMessage("MessageA", _messageA_sptr);
   }
 
   void ExecuteUnitOfWork() final {

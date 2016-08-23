@@ -46,21 +46,17 @@ namespace Rabit
         }
 
     public:
-        ManagerControlMessage(std::string name) : RabitMessage(name)
+        ManagerControlMessage() : RabitMessage()
         {
             _shutdownManager = false;
             ResetMgrStatsToggle = false;
             PulishMgrStatsTime_Sec = 10.0;
         }
 
-        virtual std::unique_ptr<RabitMessage> Clone() final
-        {
-            auto clone = std::unique_ptr<ManagerControlMessage>(new ManagerControlMessage(GetMessageTypeName()));
-            clone->CopyBase(this);
-            clone->_shutdownManager = this->_shutdownManager;
-            clone->ResetMgrStatsToggle = this->ResetMgrStatsToggle;
-            clone->PulishMgrStatsTime_Sec = this->PulishMgrStatsTime_Sec;
 
+        virtual std::unique_ptr<RabitMessage> Clone() const final
+        {
+            auto clone = std::unique_ptr<ManagerControlMessage>(new ManagerControlMessage(*this));
             return std::move(clone);
         }
 
