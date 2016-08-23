@@ -128,6 +128,21 @@ namespace Rabit
             RabitWorkspace::GetWorkspace()->AddPublishSubscribeMessage(name, msgr);
         }
 
+        //Fetch a Mesage from the Publish Subscribe Message List.
+        //Returns true if the message was found and copied, false otherwise;
+        //Will only copy the messag if the timestamps are different.
+        bool FetchMessage(std::string name, RabitMessage *msgPtr)
+        {
+            return RabitWorkspace::GetWorkspace()->FetchMessage(name, msgPtr);
+        }
+
+        //Fetch a Mesage from the Publish Subscribe Message List.
+        //Returns true if the message was found and copied, false otherwise;
+        bool ForceFetchMessage(std::string name, RabitMessage *msgPtr)
+        {
+            return RabitWorkspace::GetWorkspace()->ForceFetchMessage(name, msgPtr);
+        }
+
         template<typename T>
         void WakeUpManagerOnMessagePost(T msg)
         {

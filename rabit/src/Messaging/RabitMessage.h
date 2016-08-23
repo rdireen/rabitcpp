@@ -62,7 +62,7 @@ namespace Rabit
         //Copy message specifically does not copy the
         //_globalPublishSubscribeMessageRef nor the message Type Name
         //the messages must be of the same type.
-        virtual bool CopyMessage(const RabitMessage *msg)
+        virtual bool CopyMessage(RabitMessage *msg)
         {
             _timeStamp = msg->_timeStamp;
             //_messageTypeName = msg->GetMessageTypeName();

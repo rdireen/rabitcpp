@@ -18,18 +18,15 @@ public:
 
 public:
 
-    MessageA(std::string name) : Rabit::RabitMessage(name)
+    MessageA() : Rabit::RabitMessage()
     {
         a = 1;
         b = 2;
     }
 
-    virtual std::unique_ptr<Rabit::RabitMessage> Clone() final
+    virtual std::unique_ptr<Rabit::RabitMessage> Clone() const final
     {
-        std::unique_ptr<MessageA> clone = std::unique_ptr<MessageA>(new MessageA(GetMessageTypeName()));
-        clone->CopyBase(this);
-        clone->a = this->a;
-        clone->b = this->b;
+        std::unique_ptr<MessageA> clone = std::unique_ptr<MessageA>(new MessageA(*this));
         return std::move(clone);
     }
 
@@ -65,18 +62,18 @@ class MessageB : public Rabit::RabitMessage
 {
 public:
 
-    MessageB(std::string name) : Rabit::RabitMessage(name)
+    MessageB() : Rabit::RabitMessage()
     {
 
     }
 
-    virtual std::unique_ptr<Rabit::RabitMessage> Clone() final
+    virtual std::unique_ptr<Rabit::RabitMessage> Clone() const final
     {}
 
     virtual bool CopyMessage(Rabit::RabitMessage *msg) final
     {
         Rabit::RabitMessage::CopyMessage(msg); // call baseclass
-        if (msg->GetTypeIndex() == std::type_index(typeid(MessageA)))
+        if (msg->GetTypeIndex() == std::type_index(typeid(MessageB)))
         {
             return true;
         }

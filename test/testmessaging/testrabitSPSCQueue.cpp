@@ -105,8 +105,8 @@ TEST_F(TestRabitNonBlockingSPSCQueue, GetMessageStringTest)
 
 TEST_F(TestRabitNonBlockingSPSCQueue, SharedPointerMessageTest)
 {
-    std::shared_ptr<ManagerStatusMessage> mgrStatsMsg1_sptr = make_shared<ManagerStatusMessage>("MessageA");
-    std::shared_ptr<ManagerStatusMessage> mgrStatsMsg2_sptr = make_shared<ManagerStatusMessage>("MessageB");
+    std::shared_ptr<ManagerStatusMessage> mgrStatsMsg1_sptr = make_shared<ManagerStatusMessage>();
+    std::shared_ptr<ManagerStatusMessage> mgrStatsMsg2_sptr = make_shared<ManagerStatusMessage>();
     std::shared_ptr<ManagerStatusMessage> mgrStatsMsg3_sptr;
 
     auto rq = RabitMgrStatsQueuePtr(new RabitNonBlockingSPSCQueue<shared_ptr<ManagerStatusMessage>>(10, "rname"));

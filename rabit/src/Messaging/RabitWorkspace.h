@@ -213,6 +213,7 @@ namespace Rabit
             return error;
         }
 
+        //Get a clone of the message in the publish subscribe list.
         std::unique_ptr<RabitMessage> GetMessage(std::string name)
         {
             auto search = _publishSubscribeMsgDict.find(name);
@@ -223,6 +224,36 @@ namespace Rabit
             }
             return std::move(rm);
         }
+
+        //Get a copy of the message in the publish subscribe list.
+        //Message copy is only made if the timestamp of the message provided
+        //is different than the global message.
+        //return true if message found and copied, otherwise return false.
+        bool FetchMessage(std::string name, RabitMessage *msgPtr)
+        {
+            bool msgFound = false;
+            auto search = _publishSubscribeMsgDict.find(name);
+            if (search == _publishSubscribeMsgDict.end())
+            {
+                msgFound = _publishSubscribeMsgDict[name]->PSMsg->FetchMessage(msgPtr);
+            }
+            return msgFound;
+        }
+
+        //Get a copy of the message in the publish subscribe list.
+        //return true if message found and copied, otherwise return false.
+        bool ForceFetchMessage(std::string name, RabitMessage *msgPtr)
+        {
+            bool msgFound = false;
+            auto search = _publishSubscribeMsgDict.find(name);
+            if (search == _publishSubscribeMsgDict.end())
+            {
+                _publishSubscribeMsgDict[name]->PSMsg->ForceFetchMessage(msgPtr);
+                msgFound = true;
+            }
+            return msgFound;
+        }
+
 
     };
 }

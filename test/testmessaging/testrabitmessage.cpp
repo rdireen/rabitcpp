@@ -23,7 +23,7 @@ using namespace Rabit;
 TEST_F(RabitMessageTest, CompareTimeTrue)
 {
 
-    auto msg = MessageA("MessageA");
+    auto msg = MessageA();
     auto msg2 = msg.Clone();
 
     auto isSame = msg.CompareTime(msg2.get());
@@ -34,9 +34,9 @@ TEST_F(RabitMessageTest, CompareTimeTrue)
 TEST_F(RabitMessageTest, CompareTimeFalse)
 {
 
-    auto msg = MessageA("MessageA");
+    auto msg = MessageA();
     msg.SetTimeNow();
-    auto msg2 = MessageA("MessageA");
+    auto msg2 = MessageA();
     msg2.SetTimeNow();
 
     auto isSame = msg.CompareTime(&msg2);
@@ -47,9 +47,9 @@ TEST_F(RabitMessageTest, CompareTimeFalse)
 TEST_F(RabitMessageTest, CompareTypeIndex)
 {
 
-    auto msg = MessageA("MessageA");
-    auto msg2 = MessageA("MessageA");
-    auto msg3 = MessageB("MessageB");
+    auto msg = MessageA();
+    auto msg2 = MessageA();
+    auto msg3 = MessageB();
 
     EXPECT_EQ(msg.GetTypeIndex(), type_index(typeid(MessageA)));
     EXPECT_EQ(msg3.GetTypeIndex(), type_index(typeid(MessageB)));
@@ -61,11 +61,11 @@ TEST_F(RabitMessageTest, CompareTypeIndex)
 TEST_F(RabitMessageTest, CopyMessage)
 {
 
-    auto msg = unique_ptr<RabitMessage>(new MessageA("MessageA"));
+    auto msg = unique_ptr<RabitMessage>(new MessageA);
     static_cast<MessageA *>(msg.get())->a = 5;
     static_cast<MessageA *>(msg.get())->b = 7;
 
-    auto msg2 = MessageA("MessageA");
+    auto msg2 = MessageA();
 
     EXPECT_EQ(msg2.CopyMessage(msg.get()), true);
 
@@ -76,20 +76,20 @@ TEST_F(RabitMessageTest, CopyMessage)
 TEST_F(RabitMessageTest, CopyMessage2)
 {
 
-    auto msg = unique_ptr<RabitMessage>(new MessageA("MessageA"));
+    auto msg = unique_ptr<RabitMessage>(new MessageA);
     static_cast<MessageA *>(msg.get())->a = 5;
     static_cast<MessageA *>(msg.get())->b = 7;
 
-    auto msg3 = MessageB("MessageB");
+    auto msg3 = MessageB();
     // These arn't the same message so it wont get copied
-    bool test = msg3.CopyMessage(msg.get()) == false;
+    bool test = msg3.CopyMessage(msg.get());
     EXPECT_EQ(test, false);
 }
 
 TEST_F(RabitMessageTest, GlobalPSHasNoReferenceException)
 {
 
-    auto msg = unique_ptr<RabitMessage>(new MessageA("MessageA"));
+    auto msg = unique_ptr<RabitMessage>(new MessageA);
 
     bool caught = false;
     try
@@ -113,7 +113,7 @@ TEST_F(RabitMessageTest, GlobalPSHasNoReferenceException)
 
     EXPECT_EQ(caught, true);
 
-    auto msg2 = unique_ptr<RabitMessage>(new MessageA("MessageAStatus"));
+    auto msg2 = unique_ptr<RabitMessage>(new MessageA);
     auto psm = make_shared<PublishSubscribeMessage>(std::move(msg2));
 
     msg->GlobalPublishSubscribeMessageRef(psm);
@@ -149,7 +149,7 @@ TEST_F(RabitMessageTest, GlobalPSHasNoReferenceException)
 TEST(PublishSubscribeMessageTest, MsgTypeIndex)
 {
 
-    auto msg2 = unique_ptr<RabitMessage>(new MessageA("MessageAStatus"));
+    auto msg2 = unique_ptr<RabitMessage>(new MessageA);
     auto psm = make_shared<PublishSubscribeMessage>(std::move(msg2));
 
     EXPECT_EQ(psm->MsgTypeIndex(), type_index(typeid(MessageA)));
@@ -159,7 +159,7 @@ TEST(PublishSubscribeMessageTest, MsgTypeIndex)
 TEST(PublishSubscribeMessageTest, GetCopyOfMessage)
 {
 
-    auto msg2 = unique_ptr<RabitMessage>(new MessageA("MessageAStatus"));
+    auto msg2 = unique_ptr<RabitMessage>(new MessageA);
     auto msgc = msg2->Clone();
     auto psm = make_shared<PublishSubscribeMessage>(std::move(msg2));
 
@@ -172,11 +172,11 @@ TEST(PublishSubscribeMessageTest, GetCopyOfMessage)
 TEST(PublishSubscribeMessageTest, PostMessage)
 {
 
-    auto msg2 = unique_ptr<RabitMessage>(new Rabit::ManagerStatusMessage("MessageAStatus"));
+    auto msg2 = unique_ptr<RabitMessage>(new Rabit::ManagerStatusMessage);
     msg2->SetTimeNow();
     auto psm = make_shared<PublishSubscribeMessage>(std::move(msg2));
 
-    Rabit::ManagerStatusMessage msgc("Message_C");
+    Rabit::ManagerStatusMessage msgc;
     msgc.ManagerName = "TestMgr";
     msgc.ErrorCode = 7;
     msgc.ManagerStats.AveSleepTime_Sec = 13.75;
@@ -197,7 +197,7 @@ TEST(PublishSubscribeMessageTest, PostMessage)
 TEST(PublishSubscribeMessageTest, FetchMessage)
 {
 
-    auto msg2 = unique_ptr<RabitMessage>(new MessageA("MessageAStatus"));
+    auto msg2 = unique_ptr<RabitMessage>(new MessageA);
     msg2->SetTimeNow();
     auto msgc = msg2->Clone();
     msgc->SetTimeNow();
@@ -220,7 +220,7 @@ TEST(PublishSubscribeMessageTest, FetchMessage)
 TEST(PublishSubscribeMessageTest, DoesntFetchMessage)
 {
 
-    auto msg2 = unique_ptr<RabitMessage>(new MessageA("MessageAStatus"));
+    auto msg2 = unique_ptr<RabitMessage>(new MessageA);
     msg2->SetTimeNow();
     auto msgc = msg2->Clone();
 
@@ -234,7 +234,7 @@ TEST(PublishSubscribeMessageTest, DoesntFetchMessage)
 TEST(PublishSubscribeMessageTest, ForceFetchMessage)
 {
 
-    auto msg2 = unique_ptr<RabitMessage>(new MessageA("MessageAStatus"));
+    auto msg2 = unique_ptr<RabitMessage>(new MessageA);
     msg2->SetTimeNow();
     auto msgc = msg2->Clone();
     msgc->SetTimeNow();
