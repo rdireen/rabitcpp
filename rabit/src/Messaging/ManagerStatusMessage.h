@@ -66,9 +66,9 @@ namespace Rabit
 
         virtual bool CopyMessage(RabitMessage *msg) final
         {
-            RabitMessage::CopyMessage(msg);
             if (msg->GetTypeIndex() == std::type_index(typeid(ManagerStatusMessage)))
             {
+                RabitMessage::CopyMessage(msg);
                 ManagerStatusMessage* msMsg = static_cast<ManagerStatusMessage *>(msg);
                 *this = *msMsg;
                 this->ManagerName = msMsg->ManagerName;

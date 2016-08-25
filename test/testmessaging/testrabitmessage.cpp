@@ -116,7 +116,7 @@ TEST_F(RabitMessageTest, GlobalPSHasNoReferenceException)
     auto msg2 = unique_ptr<RabitMessage>(new MessageA);
     auto psm = make_shared<PublishSubscribeMessage>(std::move(msg2));
 
-    msg->GlobalPublishSubscribeMessageRef(psm);
+    msg->SetGlobalPublishSubscribeMessageRef(psm);
 
     caught = false;
     try

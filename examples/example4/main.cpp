@@ -40,11 +40,15 @@ public:
     return std::move(clone);
   }
 
-  virtual bool CopyMessage(Rabit::RabitMessage* msg) final{
-    Rabit::RabitMessage::CopyMessage(msg); // call baseclass
-    if(msg->GetTypeIndex() == std::type_index(typeid(MessageA))){
-      this->a = static_cast<MessageA*>(msg)->a;
-      this->b = static_cast<MessageA*>(msg)->b;
+  virtual bool CopyMessage(Rabit::RabitMessage* msg) final
+  {
+    if(msg->GetTypeIndex() == std::type_index(typeid(MessageA)))
+    {
+      MessageA *msgA = static_cast<MessageA *>(msg);
+      *this = *msgA;
+      //Rabit::RabitMessage::CopyMessage(msg); // call baseclass
+      //this->a = static_cast<MessageA*>(msg)->a;
+      //this->b = static_cast<MessageA*>(msg)->b;
       return true;
     }
     return false;
@@ -72,7 +76,8 @@ public:
 /**
  * This manager posts numbers to the simple message
  */
-class NumberManager : public RabitManager{
+class NumberManager : public RabitManager
+{
 
 private:
     shared_ptr<MessageA> _messageA_sptr;
@@ -84,7 +89,10 @@ public:
     // has been setup, it will wakeup before the timeout.
     this->SetWakeupTimeDelayMSec(500);
     _messageA_sptr = make_shared<MessageA>();
-    this->AddPublishSubscribeMessage("MessageA", _messageA_sptr);
+    _messageA_sptr->a = 5;
+    _messageA_sptr->b = 15;
+
+      this->AddPublishSubscribeMessage("MessageA", _messageA_sptr);
   }
 
   void ExecuteUnitOfWork() final {

@@ -37,10 +37,11 @@ namespace Rabit
             return _globalPublishSubscribeMessageRef;
         }
 
-        void GlobalPublishSubscribeMessageRef(std::shared_ptr<PublishSubscribeMessage> val)
+        void SetGlobalPublishSubscribeMessageRef(std::shared_ptr<PublishSubscribeMessage> val)
         {
             _globalPublishSubscribeMessageRef = val;
         }
+
 
     public:
         RabitMessage()
@@ -65,7 +66,6 @@ namespace Rabit
         virtual bool CopyMessage(RabitMessage *msg)
         {
             _timeStamp = msg->_timeStamp;
-            //_messageTypeName = msg->GetMessageTypeName();
             return true;
         }
 
@@ -74,6 +74,9 @@ namespace Rabit
         virtual std::string ToString() const
         {}
 
+        //Copy Base Items as part of the Clone Message process.
+        //Don't use this as part of a CopyMessage as it copies
+        //the _globalPublishSubscribeMessageRef.
         void CopyBase(const RabitMessage *msg)
         {
             _timeStamp = msg->_timeStamp;

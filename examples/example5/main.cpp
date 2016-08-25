@@ -43,8 +43,9 @@ public:
   }
 
   virtual bool CopyMessage(Rabit::RabitMessage* msg) final{
-    Rabit::RabitMessage::CopyMessage(msg); // call baseclass
-    if(msg->GetTypeIndex() == std::type_index(typeid(MessageA))){
+    if(msg->GetTypeIndex() == std::type_index(typeid(MessageA)))
+    {
+      Rabit::RabitMessage::CopyMessage(msg); // call baseclass
       this->a = static_cast<MessageA*>(msg)->a;
       this->b = static_cast<MessageA*>(msg)->b;
       return true;

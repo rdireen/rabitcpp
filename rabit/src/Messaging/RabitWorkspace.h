@@ -196,14 +196,14 @@ namespace Rabit
                 auto psMsgContainer = std::unique_ptr<PSMsgContainer>(new PSMsgContainer());
                 psMsgContainer->MgrMsgRef = msg;
                 psMsgContainer->PSMsg = std::make_shared<PublishSubscribeMessage>(msg->Clone());
-                msg->GlobalPublishSubscribeMessageRef(psMsgContainer->PSMsg);
+                msg->SetGlobalPublishSubscribeMessageRef(psMsgContainer->PSMsg);
                 _publishSubscribeMsgDict[name] = std::move(psMsgContainer);
             }
             else
             {
                 if (_publishSubscribeMsgDict[name]->PSMsg->MsgTypeIndex() == msg->GetTypeIndex())
                 {
-                    msg->GlobalPublishSubscribeMessageRef(_publishSubscribeMsgDict[name]->PSMsg);
+                    msg->SetGlobalPublishSubscribeMessageRef(_publishSubscribeMsgDict[name]->PSMsg);
                 }
                 else
                 {

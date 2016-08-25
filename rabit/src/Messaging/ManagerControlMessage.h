@@ -62,9 +62,9 @@ namespace Rabit
 
         virtual bool CopyMessage(RabitMessage *msg) final
         {
-            RabitMessage::CopyMessage(msg);
             if (msg->GetTypeIndex() == std::type_index(typeid(ManagerControlMessage)))
             {
+                RabitMessage::CopyMessage(msg);
                 ManagerControlMessage* mcMsg = static_cast<ManagerControlMessage *>(msg);
                 this->_shutdownManager = mcMsg->_shutdownManager;
                 this->ResetMgrStatsToggle = mcMsg->ResetMgrStatsToggle;

@@ -33,7 +33,12 @@ namespace Rabit
     {
         std::lock_guard<std::mutex> lk(_mutex);
         msg_ptr->SetTimeNow();
+        //Ensure the Copy process does not loose the mesages'
+        //publish subscribe reference. This protects against message
+        //copy processes that possibly clobber the GlobalPublishSubscribeMessageRef
+        std::shared_ptr<PublishSubscribeMessage> psmr = _statusMessage->GetGlobalPublishSubscribeMessageRef();
         _statusMessage->CopyMessage(msg_ptr);
+        _statusMessage->SetGlobalPublishSubscribeMessageRef(psmr);
         _sigPublished();
     }
 
@@ -51,7 +56,12 @@ namespace Rabit
         if (!_statusMessage->CompareTime(msg_ptr))
         {
             std::lock_guard<std::mutex> lk(_mutex);
+            //Ensure the Copy process does not loose the mesages'
+            //publish subscribe reference. This protects against message
+            //copy processes that possibly clobber the GlobalPublishSubscribeMessageRef
+            std::shared_ptr<PublishSubscribeMessage> psmr = msg_ptr->GetGlobalPublishSubscribeMessageRef();
             msg_ptr->CopyMessage(_statusMessage.get());
+            msg_ptr->SetGlobalPublishSubscribeMessageRef(psmr);
             return true;
         }
         return false;
@@ -60,7 +70,12 @@ namespace Rabit
     void PublishSubscribeMessage::ForceFetchMessage(RabitMessage *msg_ptr)
     {
         std::lock_guard<std::mutex> lk(_mutex);
+        //Ensure the Copy process does not loose the mesages'
+        //publish subscribe reference. This protects against message
+        //copy processes that possibly clobber the GlobalPublishSubscribeMessageRef
+        std::shared_ptr<PublishSubscribeMessage> psmr = msg_ptr->GetGlobalPublishSubscribeMessageRef();
         msg_ptr->CopyMessage(_statusMessage.get());
+        msg_ptr->SetGlobalPublishSubscribeMessageRef(psmr);
     }
 
 }
