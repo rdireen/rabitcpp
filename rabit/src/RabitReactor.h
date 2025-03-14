@@ -38,9 +38,11 @@ namespace Rabit
 
             if (manager != nullptr)
             {
+                //The order here is important... the move(manager) prevents access to the manager
+                //after it is moved.
+                RabitWorkspace::GetWorkspace()->AddManagerNameToListOfManagers(manager->GetManagerName());
                 listOfManagers_.push_back(std::move(manager));
             }
-
         }
 
         void Run()
@@ -57,6 +59,14 @@ namespace Rabit
             }
 
             RabitWorkspace::GetWorkspace()->LeavingReactor();
+        }
+
+        void ShutdownAllManagers()
+        {
+            for (auto &manager : listOfManagers_)
+            {
+                manager->ShutdownManager();
+            }
         }
     };
 }

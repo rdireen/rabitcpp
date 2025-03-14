@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+
+# python tool for tailing log files. You can filter out the kinds of messages 
+# you are interested in.
+
+import time 
+import subprocess
+import select
+import re
+
+
+# Regular expression of log line containing message information
+pat = re.compile('(TRACE|DEBUG|INFO|WARN|ERROR|FATAL)\s+(\w*)\s*(\d*)\s+(\w*)-([^[]*)([^]]*)')
+
+def find_matches_and_process(line):
+    m = pat.findall(line.decode('UTF-8'))
+    if m:
+        if m[0][3] == "zmqc":
+            print("[{0}][{1}][{2}][{3}][{4}]".format(*m[0]))
+            params = get_params(m[0][5])
+            print_params(params)
+    else:
+        print("NO MATCH")
+
+
+def get_params(vec):
+    """ Extract parameters from comma separated group
+    """
+    vec = vec[1:]
+    parts = vec.split(',')
+    d = {}
+    try:
+        for part in parts[:-1]:
+            sp = part.split('=')
+            d[sp[0].strip()] = sp[1].strip()
+    except:
+        d = {"error": "no dice"}
+        
+    return d 
+
+def print_params(params):
+    """ Prints the parameters as groups of 4
+    """
+    n = len(params)
+    m = int(n/4)
+    p = n - m
+    kk = list(params.keys())
+    for i in range(0, m):
+        st = "       "
+        for j in range(0, 4):
+            k = kk[4*i + j]
+            st += "{} = {}, ".format(k, params[k]) 
+        print(st)
+
+    if p > 0:
+        N = 4*m
+        nn = n - N
+        st = "       "
+        for x in range(n-nn, n ):
+            k = kk[x]
+            st += "{} = {}, ".format(k, params[k]) 
+
+        print(st)
+
+
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#                      Follow End of Log File
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+f = subprocess.Popen(['tail', '-F', "LogFile.log"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+p = select.poll()
+p.register(f.stdout)
+
+while True:
+    if p.poll(1000):
+        line = f.stdout.readline()
+        find_matches_and_process(line)
+        

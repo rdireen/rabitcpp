@@ -1,7 +1,13 @@
 build/
 Build/
+cmake-build*/
+__pycache__/
 *.user
 *swp
 .idea/
 *~
+*.o
+*.pyc
+*.bak
+
 

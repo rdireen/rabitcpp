@@ -40,13 +40,15 @@ namespace Rabit
         std::condition_variable _cvar;
         std::string _managerName = "None";
         bool _shutdownManager;
-        typedef RabitMessageQueue<std::shared_ptr<RabitMessage>> RabitQueue;
-        std::shared_ptr<RabitQueue> _mgrMessageQueue_sptr;
 
         //Timers for operational Statistics
         RabitStopWatch _mgrTotalTimeSec;
         RabitStopWatch _execUnitOfWorkTime;
         RabitStopWatch _sleepTime;
+
+    protected:
+        typedef RabitMessageQueue<std::shared_ptr<RabitMessage>> RabitQueue;
+        std::shared_ptr<RabitQueue> _mgrMessageQueue_sptr;
 
         //A Manager control message that applies to all managers.
         std::shared_ptr<ManagerControlMessage> _mgrControlAllMgrs_sptr;
@@ -65,28 +67,41 @@ namespace Rabit
 	//Message:  Rabit::ManagerControlMessage
 	//Publish Subscribe Message Name:  "ManagerControlMessage"
         std::shared_ptr<ManagerControlMessage> GetControlAllManagersMessage()
-	{
-	    return _mgrControlAllMgrs_sptr;
-	}
+        {
+            return _mgrControlAllMgrs_sptr;
+        }
 	
         //A Manager control message that applies to all managers.
-	//This message is automatically keep up-to-date in each manager.
-	//Message:  Rabit::ManagerControlMessage
-	//Publish Subscribe Message Name:  "ManagerName:ManagerControlMessage"
+        //This message is automatically keep up-to-date in each manager.
+        //Message:  Rabit::ManagerControlMessage
+        //Publish Subscribe Message Name:  "ManagerName:ManagerControlMessage"
         std::shared_ptr<ManagerControlMessage> GetControlThisManagerMessage()
-	{
-	    return _mgrControlThisMgr_sptr;
-	}
+        {
+            return _mgrControlThisMgr_sptr;
+        }
 
         //A Manager control message that applies to all managers.
-	//This message is automatically keep up-to-date in each manager.
-	//Message:  Rabit::ManagerControlMessage
-	//Publish Subscribe Message Name:  "ManagerName:ManagerStatusMessage"
+        //This message is automatically keep up-to-date in each manager.
+        //Message:  Rabit::ManagerControlMessage
+        //Publish Subscribe Message Name:  "ManagerName:ManagerStatusMessage"
         std::shared_ptr<ManagerStatusMessage> GetManagerStatusMessage()
-	{
-	    return _mgrStatus_sptr;
-	}
+        {
+            return _mgrStatus_sptr;
+        }
 
+        //Other managers may post messages into this message queue.
+        std::shared_ptr<RabitQueue> GetManagerMessageQueue()
+        {
+            return _mgrMessageQueue_sptr;
+        }
+
+        //Call this method in the manager's instantiation or init
+        //to have the manager wake up if a message is posted to the
+        //manager's message queue.
+        void SetWakeupManagerUponMessagePostedToManagersMessageQueue()
+        {
+            _mgrMessageQueue_sptr->Register_SomethingEnqueued(boost::bind(&RabitManager::WakeUpManagerEH, this));
+        }
 
         int GetWakeupTimeDelayMSec() const
         {
@@ -126,6 +141,7 @@ namespace Rabit
         {
             auto msgr = std::static_pointer_cast<RabitMessage>(msg);
             RabitWorkspace::GetWorkspace()->AddPublishSubscribeMessage(name, msgr);
+            return true;
         }
 
         //Fetch a Mesage from the Publish Subscribe Message List.
@@ -141,6 +157,38 @@ namespace Rabit
         bool ForceFetchMessage(std::string name, RabitMessage *msgPtr)
         {
             return RabitWorkspace::GetWorkspace()->ForceFetchMessage(name, msgPtr);
+        }
+
+        //Check to see if the manager exist in the list of managers.
+        bool DoesManagerExist(std::string mgrName)
+        {
+            return RabitWorkspace::GetWorkspace()->DoesManagerExist(mgrName);
+        }
+
+        //Get the Index number for a manager.
+        //There is no particuarl order other than the order the mangagers
+        //were added to the rabit reactor.  The Index number can be used
+        //as a unique ID for the manager
+        //If the manager does not exist, a -1 will be returned.
+        int GetManagerIndexNumber(std::string mgrName)
+        {
+            return RabitWorkspace::GetWorkspace()->GetManagerIndexNumber(mgrName);
+        }
+
+        //Get the Index number thhis manager.
+        //There is no particuarl order other than the order the mangagers
+        //were added to the rabit reactor.  The Index number can be used
+        //as a unique ID for the manager
+        //If the manager does not exist, a -1 will be returned.
+        int GetManagerIndexNumber()
+        {
+            return RabitWorkspace::GetWorkspace()->GetManagerIndexNumber(this->GetManagerName());
+        }
+
+        //Get a copy of the list of Manager Names.
+        std::vector<std::string> GetListOfManagerNames()
+        {
+            return RabitWorkspace::GetWorkspace()->GetListOfManagerNames();
         }
 
         template<typename T>

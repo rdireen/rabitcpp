@@ -23,6 +23,7 @@ namespace Rabit
         {
             throw GlobalPublishSubscribeException();
         }
+        return true;
     }
 
     void RabitMessage::PostMessage()
@@ -49,5 +50,26 @@ namespace Rabit
             throw GlobalPublishSubscribeException();
         }
         return messChanged;
+    }
+
+    int RabitMessage::SerializeMsgHeader(Rabit::ByteArrayWriter &bw )
+    {
+        int startIdx = bw.Idx;
+        bw.writeInt32(MessageType);
+        bw.writeInt32(MessageSource);
+        bw.writeInt32(MessageDestination);
+        bw.writeDouble(_timeStamp);
+        return bw.Idx - startIdx;
+    }
+
+
+    int RabitMessage::DeSerializeMsgHeader(Rabit::ByteArrayReader &br )
+    {
+        int startIdx = br.Idx;
+        MessageType = br.readInt32();
+        MessageSource = br.readInt32();
+        MessageDestination = br.readInt32();
+        _timeStamp = br.readDouble();
+        return br.Idx - startIdx;
     }
 }

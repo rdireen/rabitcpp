@@ -1,4 +1,4 @@
 // the configured options and settings for Tutorial
-#define rabit_VERSION_MAJOR @rabit_VERSION_MAJOR@
-#define rabit_VERSION_MINOR @rabit_VERSION_MINOR@
-#define rabit_VERSION_MINOR @rabit_VERSION_PATCH@
+#define rabit_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define rabit_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define rabit_VERSION_MINOR @PROJECT_VERSION_PATCH@

@@ -1,0 +1,4 @@
+# Note: if we start storing binaries this may be a problem, then we will have to
+# add all the files here that we don't want CRLF at the end
+
+* text eol=lf

@@ -1,6 +1,6 @@
 
 # ----------------------------------------------------------------------------
-# run this to make sure we are using C++11
+# run this to make sure we are using C++17
 # ----------------------------------------------------------------------------
 macro(use_cxx11)
   if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -9,7 +9,7 @@ macro(use_cxx11)
     endif ()
     # Might need to add something in here if we are using other operating systems.
   else ()
-    set (CMAKE_CXX_STANDARD 11)
+    set (CMAKE_CXX_STANDARD 17)
   endif ()
 endmacro(use_cxx11)
 
@@ -24,6 +24,18 @@ macro(get_include_dirs)
   endforeach()
   list(REMOVE_DUPLICATES ${PROJECT_NAME}_include_dirs)
 endmacro(get_include_dirs)
+
+function(get_directories_from_file_list file_list)
+  set(${PROJECT_NAME}_include_dirs "")
+  foreach (_headerFile ${file_list})
+    get_filename_component(_dir ${_headerFile} PATH)
+    list(APPEND ${PROJECT_NAME}_include_dirs ${_dir})
+  endforeach()
+  list(REMOVE_DUPLICATES ${PROJECT_NAME}_include_dirs)
+
+  # Return this
+  set(${PROJECT_NAME}_include_dirs ${${PROJECT_NAME}_include_dirs} PARENT_SCOPE)
+endfunction()
 
 # ----------------------------------------------------------------------------
 # run this to setup gtest

@@ -67,9 +67,9 @@ namespace Rabit
     float RabitManager::GetStatsPublishTime()
     {
         float time = 1000000.0;
-        time = _mgrControlAllMgrs_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlAllMgrs_sptr->PulishMgrStatsTime_Sec
+        time = _mgrControlAllMgrs_sptr->PublishMgrStatsTime_Sec < time ? _mgrControlAllMgrs_sptr->PublishMgrStatsTime_Sec
                                                                       : time;
-        time = _mgrControlThisMgr_sptr->PulishMgrStatsTime_Sec < time ? _mgrControlThisMgr_sptr->PulishMgrStatsTime_Sec
+        time = _mgrControlThisMgr_sptr->PublishMgrStatsTime_Sec < time ? _mgrControlThisMgr_sptr->PublishMgrStatsTime_Sec
                                                                       : time;
         return time;
     }
@@ -99,8 +99,8 @@ namespace Rabit
         _mgrTotalTimeSec.reset();
 
         while (!_shutdownManager
-               and !_mgrControlAllMgrs_sptr->GetShutdownManager()
-               and !_mgrControlThisMgr_sptr->GetShutdownManager())
+               && !_mgrControlAllMgrs_sptr->GetShutdownManager()
+               && !_mgrControlThisMgr_sptr->GetShutdownManager())
         {
             exceptionOccurred = false;
             try
@@ -109,6 +109,9 @@ namespace Rabit
                 msgChanged |= _mgrControlThisMgr_sptr->FetchMessage();
                 if (msgChanged)
                 {
+                    _shutdownManager = _mgrControlAllMgrs_sptr->GetShutdownManager();
+                    _shutdownManager |= _mgrControlAllMgrs_sptr->GetShutdownManager();
+
                     if (_mgrControlAllMgrs_sptr->ResetMgrStatsToggle != mcAllResetStats
                         || _mgrControlThisMgr_sptr->ResetMgrStatsToggle != mcThisResetStats)
                     {

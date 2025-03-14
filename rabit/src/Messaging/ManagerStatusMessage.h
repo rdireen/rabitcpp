@@ -68,10 +68,16 @@ namespace Rabit
         {
             if (msg->GetTypeIndex() == std::type_index(typeid(ManagerStatusMessage)))
             {
+                //Ensure the Copy process does not loose the mesages'
+                //publish subscribe reference.
+                std::shared_ptr<Rabit::PublishSubscribeMessage> psmr = this->GetGlobalPublishSubscribeMessageRef();
+
                 RabitMessage::CopyMessage(msg);
                 ManagerStatusMessage* msMsg = static_cast<ManagerStatusMessage *>(msg);
                 *this = *msMsg;
                 this->ManagerName = msMsg->ManagerName;
+
+                this->SetGlobalPublishSubscribeMessageRef(psmr);
                 return true;
             }
             return false;
@@ -85,6 +91,10 @@ namespace Rabit
             this->ErrorCode = 0;
             ManagerStats.Clear();
         }
+
+        virtual int Serialize(uint8_t *buf, int maxBufSize, int stype = 0);
+
+        virtual int DeSerialize(uint8_t *buf, int len, int stype = 0);
 
         virtual std::string ToString() const final
         {

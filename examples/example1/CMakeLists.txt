@@ -12,6 +12,7 @@ set(EXECUTABLE_OUTPUT_PATH "../../")
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package( Threads REQUIRED)
+
 include_directories(${${PROJECT_NAME}_include_dirs})
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})
                                

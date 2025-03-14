@@ -25,14 +25,16 @@ namespace Rabit
         bool _shutdownManager = false;
 
     public:
+        std::string ManagerName = "Unknown";
+
         //A change in the ResetMgrStatsToggle will cause the manager
         //to reset it Stats.
         bool ResetMgrStatsToggle = false;
 
-        //PulishMgrStatsTime_Sec controls how often the Manager
+        //PublishMgrStatsTime_Sec controls how often the Manager
         //Stats are published.  A value of zero or less will disable
         //publishing the manager stats.
-        float PulishMgrStatsTime_Sec = 10.0;
+        double PublishMgrStatsTime_Sec = 10.0;
 
     public:
         bool GetShutdownManager()
@@ -48,9 +50,7 @@ namespace Rabit
     public:
         ManagerControlMessage() : RabitMessage()
         {
-            _shutdownManager = false;
-            ResetMgrStatsToggle = false;
-            PulishMgrStatsTime_Sec = 10.0;
+            Clear();
         }
 
 
@@ -66,9 +66,10 @@ namespace Rabit
             {
                 RabitMessage::CopyMessage(msg);
                 ManagerControlMessage* mcMsg = static_cast<ManagerControlMessage *>(msg);
+                this->ManagerName = mcMsg->ManagerName;
                 this->_shutdownManager = mcMsg->_shutdownManager;
                 this->ResetMgrStatsToggle = mcMsg->ResetMgrStatsToggle;
-                this->PulishMgrStatsTime_Sec = mcMsg->PulishMgrStatsTime_Sec;
+                this->PublishMgrStatsTime_Sec = mcMsg->PublishMgrStatsTime_Sec;
                 return true;
             }
             return false;
@@ -76,17 +77,22 @@ namespace Rabit
 
         virtual void Clear() final
         {
+            ManagerName = "Unknown";
             _shutdownManager = false;
             ResetMgrStatsToggle = false;
-            PulishMgrStatsTime_Sec = 10.0;
+            PublishMgrStatsTime_Sec = 10.0;
         }
+
+        virtual int Serialize(uint8_t *buf, int maxBufSize, int stype = 0);
+
+        virtual int DeSerialize(uint8_t *buf, int len, int stype = 0);
 
         virtual std::string ToString() const final
         {
             std::ostringstream ss;
             ss << "ShutdownAllManagers = " << _shutdownManager
                << "   RunState = " << ResetMgrStatsToggle
-               << "PulishMgrStatsTime = " << PulishMgrStatsTime_Sec;
+               << "PulishMgrStatsTime = " << PublishMgrStatsTime_Sec;
             return ss.str();
         }
     };

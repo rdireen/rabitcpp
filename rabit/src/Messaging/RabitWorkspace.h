@@ -14,7 +14,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
-#include <boost/any.hpp>
+#include "boost/any.hpp"
 #include "RabitMessageQueue.h"
 #include "RabitNonBlockingSPSCQueue.h"
 #include "PublishSubscribeMessage.h"
@@ -55,6 +55,11 @@ namespace Rabit
         std::unordered_map<std::string, std::unique_ptr<PSMsgContainer> > _publishSubscribeMsgDict;
         std::shared_ptr<RabitMessage> _tmp;
 
+        std::vector<std::string> _listOfManagerNames;
+
+        friend class RabitReactor;
+
+
     private:
         RabitWorkspace()
         {}
@@ -62,6 +67,14 @@ namespace Rabit
         RabitWorkspace(const RabitWorkspace &rws);
 
         RabitWorkspace &operator=(const RabitWorkspace &rws);
+
+        void AddManagerNameToListOfManagers(std::string mgrName)
+        {
+            if(!DoesManagerExist(mgrName))
+            {
+                _listOfManagerNames.push_back(mgrName);
+            }
+        }
 
     public:
 
@@ -76,6 +89,37 @@ namespace Rabit
         {
             _messageQueueDict.clear();
             _publishSubscribeMsgDict.clear();
+        }
+
+
+        //Get the Index number for a manager.
+        //There is no particuarl order other than the order the mangagers
+        //were added to the rabit reactor.  The Index number can be used
+        //as a unique ID for the manager
+        //If the manager does not exist, a -1 will be returned.
+        int GetManagerIndexNumber(std::string mgrName)
+        {
+            int idxNo = -1;
+            for(int i = 0; i < _listOfManagerNames.size(); i++)
+            {
+                if( _listOfManagerNames[i] == mgrName)
+                {
+                    idxNo = i;
+                    break;
+                }
+            }
+            return idxNo;
+        }
+
+        bool DoesManagerExist(std::string mgrName)
+        {
+            return GetManagerIndexNumber(mgrName) >= 0 ? true : false;
+        }
+
+        //Get a copy of the list of Manager Names.
+        std::vector<std::string> GetListOfManagerNames()
+        {
+            return _listOfManagerNames;
         }
 
         template<typename T>
